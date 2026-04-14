@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -c ':*)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Read(//c/Users/giano/AppData/Local/Programs/Python/**)",
+      "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -m pip install pdfplumber -q)",
+      "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ':*)",
+      "Bash(git init:*)"
+    ]
+  }
+}
