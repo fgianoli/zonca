@@ -9,7 +9,10 @@
       "Read(//c/Users/giano/AppData/Local/Programs/Python/**)",
       "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -m pip install pdfplumber -q)",
       "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ':*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)"
     ]
   }
 }

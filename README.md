@@ -9,8 +9,12 @@ Permette di gestire la flotta, i soci, e le prenotazioni delle uscite in barca d
 - **Calendario settimanale** con 8 slot giornalieri per prenotare le uscite
 - **Gestione flotta**: mascarete, sandoli, gondolini, caorline
 - **Gestione soci** con ruoli voga veneta (Pope, Paron, Provin, Ospite)
+- **Certificato medico**: scadenza, upload file (PDF/JPEG/PNG), download
+- **Quota sociale**: tracciamento pagamento per anno
+- **Promemoria automatici**: email 30 giorni prima della scadenza del certificato medico
 - **Prenotazioni** con conferma da parte di Pope/Admin
 - **Autenticazione JWT** con 3 livelli: Admin, Pope, Socio
+- **Impostazioni SMTP** configurabili da interfaccia admin
 - **Form di contatto** con invio email via SMTP
 - **Download modulo adesione** socio (PDF)
 
@@ -105,10 +109,10 @@ zonca/
 │   │   ├── main.py          # FastAPI app
 │   │   ├── config.py        # Settings
 │   │   ├── database.py      # SQLAlchemy
-│   │   ├── models/          # User, Member, Boat, Booking
+│   │   ├── models/          # User, Member, Boat, Booking, AppSetting
 │   │   ├── schemas/         # Pydantic validation
 │   │   ├── api/             # REST endpoints
-│   │   └── services/        # Auth (JWT/bcrypt), Email (SMTP)
+│   │   └── services/        # Auth, Email, Reminders (scheduler)
 │   └── alembic/             # Migrazioni DB
 └── frontend/
     ├── src/
@@ -121,7 +125,7 @@ zonca/
 
 ## Schema database
 
-5 tabelle: `users` (auth), `members` (soci), `boats` (flotta), `bookings` (prenotazioni), `booking_participants` (M:N).
+6 tabelle: `users` (auth), `members` (soci con certificato medico e quota), `boats` (flotta), `bookings` (prenotazioni), `booking_participants` (M:N), `app_settings` (configurazioni SMTP/promemoria).
 
 Vincolo `UNIQUE(date, slot, boat_id)` per impedire doppie prenotazioni sullo stesso slot.
 
@@ -133,6 +137,8 @@ Vincolo `UNIQUE(date, slot, boat_id)` per impedire doppie prenotazioni sullo ste
 | Confermare prenotazioni | ✓ | ✓ | |
 | Creare prenotazioni | ✓ | ✓ | ✓ |
 | Cancellare (solo proprie) | ✓ | ✓ | ✓ |
+| Upload certificato medico | ✓ | proprio | proprio |
+| Configurare SMTP/promemoria | ✓ | | |
 
 ## API endpoints
 
@@ -145,6 +151,9 @@ Vincolo `UNIQUE(date, slot, boat_id)` per impedire doppie prenotazioni sullo ste
 | GET/POST | `/api/boats/` | Lista / crea barche |
 | GET/POST | `/api/bookings/` | Lista / crea prenotazioni |
 | POST | `/api/bookings/{id}/confirm` | Conferma (pope/admin) |
+| POST | `/api/members/{id}/medical-cert` | Upload certificato medico |
+| GET | `/api/members/{id}/medical-cert` | Download certificato medico |
+| GET/PATCH | `/api/settings/smtp` | Leggi/aggiorna impostazioni SMTP |
 | POST | `/api/contact/` | Form contatto → email |
 
 ## Licenza

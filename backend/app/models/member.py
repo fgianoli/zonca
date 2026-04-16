@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, Date, DateTime, SmallInteger, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -19,6 +19,18 @@ class Member(Base):
     phone: Mapped[str | None] = mapped_column(String(30))
     note: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # --- Certificato medico ---
+    medical_cert_expiry: Mapped[date | None] = mapped_column(Date)
+    medical_cert_file: Mapped[str | None] = mapped_column(
+        String(500)
+    )  # path relativo in uploads/
+    medical_cert_reminded: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # --- Quota sociale ---
+    fee_paid: Mapped[bool] = mapped_column(Boolean, default=False)
+    fee_year: Mapped[int | None] = mapped_column(SmallInteger)  # es. 2026
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr
@@ -18,6 +18,9 @@ class MemberCreate(BaseModel):
     email: EmailStr | None = None
     phone: str | None = None
     note: str | None = None
+    medical_cert_expiry: date | None = None
+    fee_paid: bool = False
+    fee_year: int | None = None
 
 
 class MemberRead(BaseModel):
@@ -29,6 +32,11 @@ class MemberRead(BaseModel):
     phone: str | None
     note: str | None
     is_active: bool
+    medical_cert_expiry: date | None
+    medical_cert_file: str | None
+    medical_cert_reminded: bool
+    fee_paid: bool
+    fee_year: int | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -42,3 +50,6 @@ class MemberUpdate(BaseModel):
     phone: str | None = None
     note: str | None = None
     is_active: bool | None = None
+    medical_cert_expiry: date | None = None
+    fee_paid: bool | None = None
+    fee_year: int | None = None

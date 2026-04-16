@@ -27,6 +27,9 @@ Thumbs.db
 # Docker volumes
 pgdata/
 
+# Uploads (certificati medici)
+backend/uploads/
+
 # Alembic (keep versions tracked)
 # but ignore pycache in alembic
 backend/alembic/__pycache__/
