@@ -1,14 +1,20 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_pope_or_admin
 from app.database import get_db
+from app.models.boat import Boat
 from app.models.booking import Booking, BookingParticipant
 from app.models.member import Member
 from app.models.user import User
 from app.schemas.booking import BookingCreate, BookingRead, BookingUpdate
+from app.services.notifications import (
+    notify_booking_confirmed,
+    notify_booking_created,
+    prepare_booking_cancelled,
+)
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
@@ -49,9 +55,20 @@ def get_booking(
 @router.post("/", response_model=BookingRead, status_code=201)
 def create_booking(
     body: BookingCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Check boat is active
+    boat = db.get(Boat, body.boat_id)
+    if not boat:
+        raise HTTPException(status_code=404, detail="Barca non trovata")
+    if boat.status != "attiva":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La barca non è attiva e non può essere prenotata",
+        )
+
     # Check slot availability
     existing = (
         db.query(Booking)
@@ -85,6 +102,9 @@ def create_booking(
 
     db.commit()
     db.refresh(booking)
+
+    background_tasks.add_task(notify_booking_created, booking, db)
+
     return booking
 
 
@@ -124,6 +144,7 @@ def update_booking(
 @router.post("/{booking_id}/confirm", response_model=BookingRead)
 def confirm_booking(
     booking_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _user: User = Depends(require_pope_or_admin),
 ):
@@ -133,12 +154,16 @@ def confirm_booking(
     booking.confirmed = True
     db.commit()
     db.refresh(booking)
+
+    background_tasks.add_task(notify_booking_confirmed, booking, db)
+
     return booking
 
 
 @router.delete("/{booking_id}", status_code=204)
 def delete_booking(
     booking_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -149,5 +174,10 @@ def delete_booking(
     if current_user.role == "socio" and booking.created_by != current_user.id:
         raise HTTPException(status_code=403, detail="Non puoi cancellare questa prenotazione")
 
+    # Capture notification data while booking is still in the session
+    send_cancellation = prepare_booking_cancelled(booking, db)
+
     db.delete(booking)
     db.commit()
+
+    background_tasks.add_task(send_cancellation)

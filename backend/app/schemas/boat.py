@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
 from pydantic import BaseModel
@@ -13,12 +13,20 @@ class BoatTipo(str, Enum):
     altro = "altro"
 
 
+class BoatStatus(str, Enum):
+    attiva = "attiva"
+    manutenzione = "manutenzione"
+    fuori_servizio = "fuori_servizio"
+
+
 class BoatCreate(BaseModel):
     name: str
     tipo: BoatTipo
     seats: int = 2
     color: str = "#2d7d9a"
-    available: bool = True
+    status: BoatStatus = BoatStatus.attiva
+    maintenance_reason: str | None = None
+    maintenance_until: date | None = None
     note: str | None = None
 
 
@@ -28,6 +36,9 @@ class BoatRead(BaseModel):
     tipo: BoatTipo
     seats: int
     color: str
+    status: BoatStatus
+    maintenance_reason: str | None
+    maintenance_until: date | None
     available: bool
     note: str | None
     created_at: datetime
@@ -40,5 +51,7 @@ class BoatUpdate(BaseModel):
     tipo: BoatTipo | None = None
     seats: int | None = None
     color: str | None = None
-    available: bool | None = None
+    status: BoatStatus | None = None
+    maintenance_reason: str | None = None
+    maintenance_until: date | None = None
     note: str | None = None

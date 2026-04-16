@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import auth, boats, bookings, contact, members, settings
+from app.api import attendance, auth, boats, bookings, circulars, contact, dashboard, documents, fees, finance, members, settings, weather
 from app.services.reminders import reminder_loop
 
 
@@ -37,6 +37,13 @@ app.include_router(boats.router, prefix="/api")
 app.include_router(bookings.router, prefix="/api")
 app.include_router(contact.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
+app.include_router(fees.router, prefix="/api")
+app.include_router(documents.router, prefix="/api")
+app.include_router(attendance.router, prefix="/api")
+app.include_router(finance.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
+app.include_router(weather.router, prefix="/api")
+app.include_router(circulars.router, prefix="/api")
 
 
 @app.get("/api/health")

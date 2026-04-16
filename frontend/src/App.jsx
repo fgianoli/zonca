@@ -15,10 +15,22 @@ function HomePage() {
       <header
         style={{
           textAlign: "center",
-          padding: "60px 20px 40px",
+          padding: "40px 20px 32px",
           borderBottom: `1px solid ${colors.lagoon}33`,
         }}
       >
+        <img
+          src="/logo_zonca.jpg"
+          alt="Logo Remiera Zonca"
+          style={{
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: `3px solid ${colors.gold}`,
+            marginBottom: 16,
+          }}
+        />
         <h1
           style={{
             fontFamily: fonts.display,
@@ -36,7 +48,7 @@ function HomePage() {
             marginTop: 8,
           }}
         >
-          Scuola di Voga alla Veneta
+          Scuola Padovana di Voga alla Veneta "Vittorio Zonca"
         </p>
       </header>
 

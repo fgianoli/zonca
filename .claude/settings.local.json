@@ -12,7 +12,14 @@
       "Bash(git init:*)",
       "Bash(git remote:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(python -c \"from app.models import Fee, MemberDocument; from app.schemas.fee import FeeCreate, FeeRead, FeeUpdate, FeeSummary; from app.schemas.document import DocumentRead, DocumentType; print\\('All imports OK'\\)\")",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['app/models/boat.py', 'app/models/attendance.py', 'app/models/__init__.py', 'app/schemas/boat.py', 'app/schemas/attendance.py', 'app/api/boats.py', 'app/api/attendance.py', 'app/api/bookings.py', 'app/main.py']]\")",
+      "Bash(python -c \"from app.models.finance import FinanceRecord; from app.schemas.finance import FinanceCreate, FinanceRead, FinanceUpdate, FinanceSummary; print\\('All imports OK'\\)\")",
+      "Bash(python -c \"import py_compile; py_compile.compile\\('app/services/notifications.py', doraise=True\\); py_compile.compile\\('app/api/bookings.py', doraise=True\\); py_compile.compile\\('app/models/circular.py', doraise=True\\); py_compile.compile\\('app/schemas/circular.py', doraise=True\\); py_compile.compile\\('app/api/circulars.py', doraise=True\\); py_compile.compile\\('app/models/__init__.py', doraise=True\\); py_compile.compile\\('app/main.py', doraise=True\\); print\\('All files compile OK'\\)\")",
+      "Bash(python3 -c ':*)",
+      "Bash(py -c ':*)",
+      "Bash(C:/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ':*)"
     ]
   }
 }

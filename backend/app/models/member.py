@@ -45,3 +45,7 @@ class Member(Base):
     bookings_as_pope = relationship(
         "Booking", back_populates="pope", foreign_keys="Booking.pope_id"
     )
+    fees = relationship("Fee", back_populates="member", cascade="all, delete-orphan")
+    documents = relationship(
+        "MemberDocument", back_populates="member", cascade="all, delete-orphan"
+    )

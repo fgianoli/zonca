@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, SmallInteger, String, Text
+from sqlalchemy import Date, DateTime, SmallInteger, String, Text
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -16,7 +17,11 @@ class Boat(Base):
     )  # mascareta, sandolo-w, sandolo-4, gondolino-4, caorlina-6, altro
     seats: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=2)
     color: Mapped[str] = mapped_column(String(7), default="#2d7d9a")
-    available: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="attiva"
+    )  # attiva, manutenzione, fuori_servizio
+    maintenance_reason: Mapped[str | None] = mapped_column(Text)
+    maintenance_until: Mapped[date | None] = mapped_column(Date)
     note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -29,3 +34,8 @@ class Boat(Base):
 
     # Relationships
     bookings = relationship("Booking", back_populates="boat")
+    attendances = relationship("Attendance", back_populates="boat")
+
+    @hybrid_property
+    def available(self) -> bool:
+        return self.status == "attiva"
