@@ -11,7 +11,7 @@ Permette di gestire la flotta, i soci, e le prenotazioni delle uscite in barca d
 - **Gestione soci** con ruoli voga veneta (Pope, Paron, Provin, Ospite)
 - **Certificato medico**: scadenza, upload file (PDF/JPEG/PNG), download
 - **Quota sociale**: tracciamento pagamento per anno
-- **Promemoria automatici**: email 30 giorni prima della scadenza del certificato medico
+- **Promemoria automatici**: check settimanale, email 30 giorni prima della scadenza del certificato medico
 - **Prenotazioni** con conferma da parte di Pope/Admin
 - **Autenticazione JWT** con 3 livelli: Admin, Pope, Socio
 - **Impostazioni SMTP** configurabili da interfaccia admin

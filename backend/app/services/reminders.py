@@ -115,11 +115,14 @@ async def check_and_send_reminders():
         db.close()
 
 
+WEEK_SECONDS = 7 * 24 * 3600  # 604800
+
+
 async def reminder_loop():
-    """Loop infinito: esegue il check una volta al giorno."""
+    """Loop infinito: esegue il check una volta a settimana."""
     # Attende 30 secondi al boot per dare tempo al DB di essere pronto
     await asyncio.sleep(30)
-    logger.info("Medical cert reminder scheduler started")
+    logger.info("Medical cert reminder scheduler started (weekly)")
 
     while True:
         try:
@@ -127,5 +130,5 @@ async def reminder_loop():
         except Exception:
             logger.exception("Reminder loop error")
 
-        # Aspetta 24 ore prima del prossimo check
-        await asyncio.sleep(86400)
+        # Aspetta 7 giorni prima del prossimo check
+        await asyncio.sleep(WEEK_SECONDS)
