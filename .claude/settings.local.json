@@ -19,7 +19,16 @@
       "Bash(python -c \"import py_compile; py_compile.compile\\('app/services/notifications.py', doraise=True\\); py_compile.compile\\('app/api/bookings.py', doraise=True\\); py_compile.compile\\('app/models/circular.py', doraise=True\\); py_compile.compile\\('app/schemas/circular.py', doraise=True\\); py_compile.compile\\('app/api/circulars.py', doraise=True\\); py_compile.compile\\('app/models/__init__.py', doraise=True\\); py_compile.compile\\('app/main.py', doraise=True\\); print\\('All files compile OK'\\)\")",
       "Bash(python3 -c ':*)",
       "Bash(py -c ':*)",
-      "Bash(C:/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ':*)"
+      "Bash(C:/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ':*)",
+      "Bash(python -c ' *)",
+      "Bash(py --version)",
+      "Bash(where pwsh *)",
+      "Bash(where powershell *)",
+      "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c ' *)",
+      "Bash(\"/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe\")",
+      "Bash([ -d \"$DEST\" ])",
+      "Bash(rm -rf C:/Users/giano/AppData/Roaming/QGIS/QGIS4/profiles/default/python/plugins/water_connection_plugin_v5)",
+      "Bash(cp -r C:/Users/giano/Desktop/SVILUPPO/acea/water_connection_plugin_v5.0 C:/Users/giano/AppData/Roaming/QGIS/QGIS4/profiles/default/python/plugins/water_connection_plugin_v5)"
     ]
   }
 }
