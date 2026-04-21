@@ -37,6 +37,7 @@ export default function MappaPage() {
   const [routes, setRoutes] = useState([]); // [{ fid, nome, lunghezza, color }]
   const [selected, setSelected] = useState(null);
   const [hiddenFids, setHiddenFids] = useState(new Set());
+  const [panelOpen, setPanelOpen] = useState(true);
 
   // Misura
   const [measureMode, setMeasureMode] = useState(false);
@@ -321,14 +322,37 @@ export default function MappaPage() {
     >
       <div ref={mapContainer} style={{ position: "absolute", inset: 0 }} />
 
-      {/* Pannello legenda / itinerari */}
-      <div
+      {/* Home */}
+      <a
+        href="/"
         style={{
           position: "absolute",
           top: 16,
           left: 16,
-          width: 280,
-          maxHeight: "calc(100% - 32px)",
+          zIndex: 6,
+          padding: "8px 14px",
+          background: "#ffffffee",
+          backdropFilter: "blur(10px)",
+          borderRadius: 10,
+          color: colors.foam,
+          textDecoration: "none",
+          fontSize: 13,
+          fontWeight: 600,
+          boxShadow: colors.shadowSoft,
+          border: `1px solid ${colors.borderSoft}`,
+        }}
+      >
+        ← Home
+      </a>
+
+      {/* Pannello legenda / itinerari (collassabile) */}
+      <div
+        style={{
+          position: "absolute",
+          top: 60,
+          left: 16,
+          width: panelOpen ? 280 : "auto",
+          maxHeight: panelOpen ? "calc(100% - 76px)" : "auto",
           background: "#ffffffee",
           backdropFilter: "blur(10px)",
           borderRadius: 14,
@@ -337,99 +361,124 @@ export default function MappaPage() {
           display: "flex",
           flexDirection: "column",
           zIndex: 5,
+          transition: "width .2s ease",
         }}
       >
-        <div
+        <button
+          onClick={() => setPanelOpen((v) => !v)}
           style={{
-            padding: "14px 16px",
+            padding: panelOpen ? "14px 16px" : "10px 14px",
             background: colors.gradLagoon,
             color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            width: "100%",
+            boxShadow: "none",
           }}
+          title={panelOpen ? "Nascondi pannello" : "Mostra itinerari"}
         >
-          <div style={{ fontFamily: fonts.display, fontSize: 18, fontWeight: 700 }}>
-            🗺 Itinerari Remiera
-          </div>
-          <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>
-            {routes.length} percorsi · {totalKm.toFixed(0)} km totali
-          </div>
-        </div>
-        <div
-          style={{
-            padding: "10px 12px",
-            overflowY: "auto",
-            flex: 1,
-          }}
-        >
-          {routes.map((r) => {
-            const hidden = hiddenFids.has(r.fid);
-            return (
-              <div
-                key={r.fid}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "8px 10px",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                  opacity: hidden ? 0.4 : 1,
-                  transition: "background .15s",
-                  marginBottom: 2,
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = colors.panel)
-                }
-                onMouseLeave={(e) => (e.currentTarget.style.background = "")}
-              >
+          <span style={{ fontSize: 18 }}>🗺</span>
+          {panelOpen ? (
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: fonts.display, fontSize: 16, fontWeight: 700 }}>
+                Itinerari Remiera
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.9, marginTop: 1 }}>
+                {routes.length} percorsi · {totalKm.toFixed(0)} km totali
+              </div>
+            </div>
+          ) : (
+            <span style={{ fontSize: 13, fontWeight: 700 }}>
+              {routes.length}
+            </span>
+          )}
+          <span style={{ fontSize: 14, opacity: 0.9 }}>
+            {panelOpen ? "▾" : "▸"}
+          </span>
+        </button>
+        {panelOpen && (
+          <div
+            style={{
+              padding: "10px 12px",
+              overflowY: "auto",
+              flex: 1,
+            }}
+          >
+            {routes.map((r) => {
+              const hidden = hiddenFids.has(r.fid);
+              return (
                 <div
-                  onClick={() => toggleRoute(r.fid)}
-                  title={hidden ? "Mostra" : "Nascondi"}
+                  key={r.fid}
                   style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: 4,
-                    border: `2px solid ${r.color}`,
-                    background: hidden ? "transparent" : r.color,
-                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    opacity: hidden ? 0.4 : 1,
+                    transition: "background .15s",
+                    marginBottom: 2,
                   }}
-                />
-                <div
-                  onClick={() => zoomToRoute(r.fid)}
-                  style={{ flex: 1, minWidth: 0 }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = colors.panel)
+                  }
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                 >
                   <div
+                    onClick={() => toggleRoute(r.fid)}
+                    title={hidden ? "Mostra" : "Nascondi"}
                     style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: colors.foam,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      border: `2px solid ${r.color}`,
+                      background: hidden ? "transparent" : r.color,
+                      flexShrink: 0,
                     }}
+                  />
+                  <div
+                    onClick={() => zoomToRoute(r.fid)}
+                    style={{ flex: 1, minWidth: 0 }}
                   >
-                    {r.nome}
-                  </div>
-                  <div style={{ fontSize: 11, color: colors.muted }}>
-                    {r.lunghezza?.toFixed(2)} km
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: colors.foam,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {r.nome}
+                    </div>
+                    <div style={{ fontSize: 11, color: colors.muted }}>
+                      {r.lunghezza?.toFixed(2)} km
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+            {routes.length === 0 && (
+              <div style={{ color: colors.muted, fontSize: 13, padding: 10 }}>
+                Caricamento itinerari…
               </div>
-            );
-          })}
-          {routes.length === 0 && (
-            <div style={{ color: colors.muted, fontSize: 13, padding: 10 }}>
-              Caricamento itinerari…
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Tool misura */}
+      {/* Tool misura (sotto i controlli mappa, a destra) */}
       <div
         style={{
           position: "absolute",
-          top: 16,
-          right: 60,
+          top: 140,
+          right: 16,
           background: "#ffffffee",
           backdropFilter: "blur(10px)",
           borderRadius: 14,
@@ -614,27 +663,6 @@ export default function MappaPage() {
         </div>
       )}
 
-      {/* Bottone home (overlay, se nessun Layout) */}
-      <a
-        href="/"
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 5,
-          padding: "10px 14px",
-          background: "#ffffffee",
-          backdropFilter: "blur(10px)",
-          borderRadius: 10,
-          color: colors.foam,
-          textDecoration: "none",
-          fontSize: 13,
-          fontWeight: 600,
-          boxShadow: colors.shadowSoft,
-        }}
-      >
-        ← Home
-      </a>
     </div>
   );
 }
