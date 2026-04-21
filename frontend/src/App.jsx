@@ -22,6 +22,7 @@ import ImpostazioniPage from "./pages/ImpostazioniPage";
 import UtentiPage from "./pages/UtentiPage";
 import ProfiloPage from "./pages/ProfiloPage";
 import EventiPage from "./pages/EventiPage";
+import MappaPage from "./pages/MappaPage";
 
 import { colors, fonts } from "./styles/theme";
 
@@ -44,24 +45,47 @@ function HomePage() {
           borderBottom: `1px solid ${colors.borderSoft}`,
         }}
       >
-        <a
-          href="/login"
+        <div
           style={{
             position: "absolute",
             top: 24,
             right: 24,
-            padding: "10px 20px",
-            background: colors.gradLagoon,
-            color: "#fff",
-            borderRadius: 10,
-            textDecoration: "none",
-            fontSize: 13,
-            fontWeight: 600,
-            boxShadow: colors.shadowLagoon,
+            display: "flex",
+            gap: 10,
           }}
         >
-          Area riservata →
-        </a>
+          <a
+            href="/mappa"
+            style={{
+              padding: "10px 18px",
+              background: "#ffffffcc",
+              backdropFilter: "blur(8px)",
+              color: colors.foam,
+              borderRadius: 10,
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 600,
+              border: `1px solid ${colors.border}`,
+            }}
+          >
+            🗺 Itinerari
+          </a>
+          <a
+            href="/login"
+            style={{
+              padding: "10px 20px",
+              background: colors.gradLagoon,
+              color: "#fff",
+              borderRadius: 10,
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 600,
+              boxShadow: colors.shadowLagoon,
+            }}
+          >
+            Area riservata →
+          </a>
+        </div>
         <img
           src="/logo_zonca.jpg"
           alt="Logo Remiera Zonca"
@@ -116,6 +140,7 @@ export default function App() {
           {/* Public */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/mappa" element={<MappaPage />} />
 
           {/* Protected - all authenticated users */}
           <Route

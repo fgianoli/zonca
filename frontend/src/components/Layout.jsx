@@ -156,6 +156,9 @@ export default function Layout() {
         <NavLink to="/eventi" style={navStyle}>
           🎉 Eventi
         </NavLink>
+        <NavLink to="/mappa" style={navStyle}>
+          🗺 Mappa
+        </NavLink>
         <NavLink to="/profilo" style={navStyle}>
           👤 Profilo
         </NavLink>
