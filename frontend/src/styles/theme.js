@@ -1,82 +1,110 @@
-// Light Venetian theme - easier to read
+// Modern Venetian Sky theme – light, vivace, arioso
 export const colors = {
-  // Backgrounds (chiari)
-  water: "#f5f1ea",   // sand / cream background principale
-  deep: "#ffffff",    // card / panel background
-  panel: "#faf7f2",   // alternate panel (subtle ivory)
+  // Backgrounds
+  water: "#f8fbfd",    // sfondo principale, bianco con un filo di azzurro
+  deep: "#ffffff",     // card / panel bianche pure
+  panel: "#f1f7fa",    // pannelli alternati (hero, sezioni)
 
   // Testo
-  foam: "#1a3a4a",    // primary text (dark teal)
-  muted: "#6b7f8c",   // secondary text
+  foam: "#0f1f2e",     // primary text (quasi nero, caldo-freddo)
+  muted: "#64748b",    // secondary text (slate-500)
+  faint: "#94a3b8",    // tertiary / placeholder
 
-  // Accenti Venezia
-  lagoon: "#2d7d9a",  // primary action (teal)
-  gold: "#b8822f",    // headers / highlights (un po' piu scuro per contrasto su bg chiaro)
-  red: "#c0392b",     // destructive
-  green: "#16a34a",   // success
-  orange: "#d35400",  // warning
+  // Accenti Venezia (vivaci)
+  lagoon: "#0891b2",   // cyan-600, azzurro laguna vibrante
+  lagoonLight: "#22d3ee", // cyan-400
+  lagoonDark: "#0e7490",  // cyan-700 per hover
+  gold: "#d97706",     // amber-600, oro caldo
+  goldLight: "#f59e0b",// amber-500
+  red: "#dc2626",
+  green: "#059669",
+  orange: "#ea580c",
 
-  // Bordi
-  border: "#d9d0c0",  // neutral beige border
-  borderSoft: "#e9e2d4",
+  // Strutturali
+  border: "#e2e8f0",   // slate-200
+  borderSoft: "#f1f5f9", // slate-100
+
+  // Shadows colorate
+  shadowLagoon: "0 6px 20px rgba(8, 145, 178, 0.10)",
+  shadowGold: "0 6px 20px rgba(217, 119, 6, 0.12)",
+  shadowSoft: "0 2px 8px rgba(15, 31, 46, 0.06)",
+  shadowMed: "0 8px 24px rgba(15, 31, 46, 0.08)",
+  shadowLg: "0 16px 48px rgba(15, 31, 46, 0.12)",
+
+  // Gradients
+  gradLagoon: "linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)",
+  gradGold: "linear-gradient(135deg, #d97706 0%, #f59e0b 100%)",
+  gradSky: "linear-gradient(180deg, #ecfeff 0%, #f8fbfd 50%, #ffffff 100%)",
+  gradHero: "linear-gradient(135deg, #e0f2fe 0%, #f0fdfa 50%, #fffbeb 100%)",
 };
 
 export const fonts = {
-  display: "'Playfair Display', serif",
-  body: "'Lato', sans-serif",
+  display: "'Playfair Display', Georgia, serif",
+  body: "'Inter', 'Lato', -apple-system, BlinkMacSystemFont, sans-serif",
 };
 
 // Shared UI styles
 export const S = {
+  // Bottoni
   btn: {
-    padding: "10px 20px",
-    backgroundColor: colors.lagoon,
+    padding: "11px 22px",
+    background: colors.gradLagoon,
     color: "#fff",
     border: "none",
-    borderRadius: 8,
+    borderRadius: 10,
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 600,
     fontFamily: fonts.body,
     cursor: "pointer",
-    transition: "opacity .2s, background-color .2s",
+    transition: "transform .15s ease, box-shadow .15s ease, opacity .15s ease",
+    boxShadow: colors.shadowLagoon,
+    letterSpacing: 0.2,
   },
   btnSmall: {
-    padding: "6px 12px",
+    padding: "7px 14px",
     fontSize: 12,
-    borderRadius: 6,
+    borderRadius: 8,
     border: "none",
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: "pointer",
     fontFamily: fonts.body,
+    transition: "all .15s ease",
   },
   btnGold: {
-    backgroundColor: colors.gold,
+    background: colors.gradGold,
     color: "#fff",
+    boxShadow: colors.shadowGold,
   },
   btnRed: {
     backgroundColor: colors.red,
     color: "#fff",
+    boxShadow: "0 4px 12px rgba(220, 38, 38, 0.2)",
   },
   btnGreen: {
     backgroundColor: colors.green,
     color: "#fff",
+    boxShadow: "0 4px 12px rgba(5, 150, 105, 0.2)",
   },
   btnGhost: {
-    backgroundColor: "transparent",
-    border: `1px solid ${colors.border}`,
+    background: "transparent",
+    border: `1.5px solid ${colors.border}`,
     color: colors.foam,
+    boxShadow: "none",
   },
+
+  // Input
   input: {
     width: "100%",
-    padding: "10px 14px",
+    padding: "11px 14px",
     backgroundColor: "#fff",
-    border: `1px solid ${colors.border}`,
-    borderRadius: 6,
+    border: `1.5px solid ${colors.border}`,
+    borderRadius: 10,
     color: colors.foam,
     fontSize: 14,
     fontFamily: fonts.body,
     outline: "none",
     boxSizing: "border-box",
+    transition: "border-color .15s ease, box-shadow .15s ease",
   },
   label: {
     display: "block",
@@ -84,43 +112,71 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: 6,
     fontFamily: fonts.body,
-    fontWeight: 700,
+    fontWeight: 600,
   },
+
+  // Card
   card: {
     backgroundColor: colors.deep,
-    border: `1px solid ${colors.border}`,
-    borderRadius: 12,
+    border: `1px solid ${colors.borderSoft}`,
+    borderRadius: 14,
     padding: 20,
-    boxShadow: "0 1px 3px rgba(26, 58, 74, 0.06)",
+    boxShadow: colors.shadowSoft,
   },
+  cardElevated: {
+    backgroundColor: colors.deep,
+    border: `1px solid ${colors.borderSoft}`,
+    borderRadius: 16,
+    padding: 24,
+    boxShadow: colors.shadowMed,
+  },
+
+  // Titoli
   title: {
     fontFamily: fonts.display,
-    color: colors.gold,
-    fontSize: 28,
+    color: colors.foam,
+    fontSize: 30,
     margin: 0,
+    fontWeight: 700,
+    letterSpacing: -0.5,
+  },
+  titleAccent: {
+    fontFamily: fonts.display,
+    color: colors.lagoon,
+    fontSize: 30,
+    margin: 0,
+    fontWeight: 700,
+    letterSpacing: -0.5,
   },
   subtitle: {
     color: colors.muted,
     fontSize: 14,
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: 400,
   },
+
+  // Badge
   badge: {
     display: "inline-block",
-    padding: "2px 8px",
-    borderRadius: 4,
+    padding: "3px 10px",
+    borderRadius: 999,
     fontSize: 11,
-    fontWeight: 700,
-    textTransform: "uppercase",
+    fontWeight: 600,
+    letterSpacing: 0.3,
   },
+
+  // Modali
   modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(26, 58, 74, 0.45)",
+    backgroundColor: "rgba(15, 31, 46, 0.45)",
+    backdropFilter: "blur(4px)",
+    WebkitBackdropFilter: "blur(4px)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -129,28 +185,29 @@ export const S = {
   },
   modal: {
     backgroundColor: colors.deep,
-    border: `1px solid ${colors.border}`,
-    borderRadius: 12,
+    border: `1px solid ${colors.borderSoft}`,
+    borderRadius: 18,
     padding: 32,
     maxWidth: 600,
     width: "100%",
     maxHeight: "90vh",
     overflowY: "auto",
-    boxShadow: "0 10px 30px rgba(26, 58, 74, 0.2)",
+    boxShadow: colors.shadowLg,
   },
+
   container: {
     maxWidth: 1200,
     margin: "0 auto",
-    padding: "24px 20px",
+    padding: "32px 24px",
   },
 };
 
-// Ruoli/tipi info
+// Ruoli
 export const RUOLI = {
-  pope: { label: "Pope", badge: "PP", desc: "Capitano / Responsabile", color: "#b8822f", icon: "⚓" },
-  paron: { label: "Paron", badge: "PA", desc: "Proprietario barca", color: "#d35400", icon: "🏛" },
-  provin: { label: "Provin", badge: "PV", desc: "Vogatore", color: "#2d7d9a", icon: "🚣" },
-  ospite: { label: "Ospite", badge: "OS", desc: "Non socio", color: "#6b7f8c", icon: "👤" },
+  pope: { label: "Pope", badge: "PP", desc: "Capitano / Responsabile", color: "#d97706", icon: "⚓" },
+  paron: { label: "Paron", badge: "PA", desc: "Proprietario barca", color: "#ea580c", icon: "🏛" },
+  provin: { label: "Provin", badge: "PV", desc: "Vogatore", color: "#0891b2", icon: "🚣" },
+  ospite: { label: "Ospite", badge: "OS", desc: "Non socio", color: "#64748b", icon: "👤" },
 };
 
 export const TIPI_BARCA = {

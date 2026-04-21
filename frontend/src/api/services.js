@@ -7,6 +7,22 @@ export const authApi = {
   register: (data) => api.post("/api/auth/register", data),
 };
 
+// ── Users (admin) ─────────────────────────────────
+export const usersApi = {
+  list: () => api.get("/api/users/"),
+  get: (id) => api.get(`/api/users/${id}`),
+  create: (data) => api.post("/api/users/", data),
+  update: (id, data) => api.patch(`/api/users/${id}`, data),
+  remove: (id) => api.delete(`/api/users/${id}`),
+  resetPassword: (id, newPassword = null) =>
+    api.post(`/api/users/${id}/reset-password`, { new_password: newPassword }),
+  changeOwnPassword: (currentPassword, newPassword) =>
+    api.post("/api/users/me/change-password", {
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+};
+
 // ── Members ───────────────────────────────────────
 export const membersApi = {
   list: (params = {}) => api.get("/api/members/", { params }),

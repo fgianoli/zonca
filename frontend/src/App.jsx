@@ -19,6 +19,7 @@ import DashboardPage from "./pages/DashboardPage";
 import EconomiaPage from "./pages/EconomiaPage";
 import CircolariPage from "./pages/CircolariPage";
 import ImpostazioniPage from "./pages/ImpostazioniPage";
+import UtentiPage from "./pages/UtentiPage";
 
 import { colors, fonts } from "./styles/theme";
 
@@ -29,56 +30,71 @@ function HomePage() {
         minHeight: "100vh",
         backgroundColor: colors.water,
         fontFamily: fonts.body,
+        color: colors.foam,
       }}
     >
       <header
         style={{
           textAlign: "center",
-          padding: "40px 20px 32px",
-          borderBottom: `1px solid ${colors.lagoon}33`,
+          padding: "64px 20px 56px",
+          background: colors.gradHero,
           position: "relative",
+          borderBottom: `1px solid ${colors.borderSoft}`,
         }}
       >
         <a
           href="/login"
           style={{
             position: "absolute",
-            top: 20,
-            right: 20,
-            padding: "8px 18px",
-            backgroundColor: colors.lagoon,
+            top: 24,
+            right: 24,
+            padding: "10px 20px",
+            background: colors.gradLagoon,
             color: "#fff",
-            borderRadius: 6,
+            borderRadius: 10,
             textDecoration: "none",
             fontSize: 13,
-            fontWeight: 700,
+            fontWeight: 600,
+            boxShadow: colors.shadowLagoon,
           }}
         >
-          Area riservata
+          Area riservata →
         </a>
         <img
           src="/logo_zonca.jpg"
           alt="Logo Remiera Zonca"
           style={{
-            width: 120,
-            height: 120,
+            width: 130,
+            height: 130,
             borderRadius: "50%",
             objectFit: "cover",
-            border: `3px solid ${colors.gold}`,
-            marginBottom: 16,
+            marginBottom: 20,
+            boxShadow: "0 12px 32px rgba(8, 145, 178, 0.25)",
+            border: `4px solid #fff`,
           }}
         />
         <h1
           style={{
             fontFamily: fonts.display,
-            color: colors.gold,
-            fontSize: 36,
+            color: colors.foam,
+            fontSize: 48,
             margin: 0,
+            fontWeight: 700,
+            letterSpacing: -1,
           }}
         >
-          Remiera Zonca
+          Remiera <span style={{ color: colors.lagoon }}>Zonca</span>
         </h1>
-        <p style={{ color: colors.muted, fontSize: 16, marginTop: 8 }}>
+        <p
+          style={{
+            color: colors.muted,
+            fontSize: 17,
+            marginTop: 10,
+            maxWidth: 520,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
           Scuola Padovana di Voga alla Veneta "Vittorio Zonca"
         </p>
       </header>
@@ -135,6 +151,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/economia" element={<EconomiaPage />} />
             <Route path="/circolari" element={<CircolariPage />} />
+            <Route path="/utenti" element={<UtentiPage />} />
             <Route path="/impostazioni" element={<ImpostazioniPage />} />
           </Route>
 

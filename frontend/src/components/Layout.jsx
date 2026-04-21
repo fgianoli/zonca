@@ -3,14 +3,17 @@ import { useAuth } from "../context/AuthContext";
 import { colors, fonts } from "../styles/theme";
 
 const navStyle = ({ isActive }) => ({
-  padding: "10px 18px",
-  color: isActive ? colors.gold : colors.foam,
-  borderBottom: `3px solid ${isActive ? colors.gold : "transparent"}`,
+  padding: "10px 16px",
+  color: isActive ? "#fff" : colors.muted,
+  background: isActive ? colors.gradLagoon : "transparent",
   textDecoration: "none",
-  fontWeight: 700,
-  fontSize: 14,
+  fontWeight: 600,
+  fontSize: 13,
   fontFamily: fonts.body,
-  transition: "color .2s, border-color .2s",
+  borderRadius: 10,
+  whiteSpace: "nowrap",
+  transition: "all .15s ease",
+  boxShadow: isActive ? colors.shadowLagoon : "none",
 });
 
 export default function Layout() {
@@ -37,14 +40,18 @@ export default function Layout() {
       {/* Header */}
       <header
         style={{
-          backgroundColor: colors.deep,
-          borderBottom: `2px solid ${colors.gold}`,
-          padding: "12px 24px",
+          background: colors.deep,
+          borderBottom: `1px solid ${colors.borderSoft}`,
+          padding: "14px 28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: 12,
+          boxShadow: colors.shadowSoft,
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -56,22 +63,23 @@ export default function Layout() {
               height: 44,
               borderRadius: "50%",
               objectFit: "cover",
-              border: `2px solid ${colors.gold}`,
+              boxShadow: "0 4px 12px rgba(8, 145, 178, 0.25)",
             }}
           />
           <div>
             <div
               style={{
                 fontFamily: fonts.display,
-                color: colors.gold,
+                color: colors.foam,
                 fontSize: 20,
                 lineHeight: 1,
+                fontWeight: 700,
               }}
             >
-              Remiera Zonca
+              Remiera <span style={{ color: colors.lagoon }}>Zonca</span>
             </div>
-            <div style={{ color: colors.muted, fontSize: 11 }}>
-              {user?.email} — {user?.role}
+            <div style={{ color: colors.muted, fontSize: 11, marginTop: 3 }}>
+              {user?.email} · <span style={{ color: colors.lagoon, fontWeight: 600 }}>{user?.role}</span>
             </div>
           </div>
         </div>
@@ -79,13 +87,16 @@ export default function Layout() {
         <button
           onClick={handleLogout}
           style={{
-            padding: "8px 16px",
+            padding: "9px 18px",
             background: "transparent",
-            border: `1px solid ${colors.lagoon}`,
+            border: `1.5px solid ${colors.border}`,
             color: colors.foam,
-            borderRadius: 6,
+            borderRadius: 10,
             cursor: "pointer",
             fontSize: 13,
+            fontWeight: 600,
+            fontFamily: fonts.body,
+            transition: "all .15s ease",
           }}
         >
           Esci
@@ -96,8 +107,8 @@ export default function Layout() {
       <nav
         style={{
           backgroundColor: colors.deep,
-          borderBottom: `1px solid ${colors.lagoon}33`,
-          padding: "0 24px",
+          borderBottom: `1px solid ${colors.borderSoft}`,
+          padding: "10px 28px",
           display: "flex",
           gap: 4,
           overflowX: "auto",
@@ -130,6 +141,9 @@ export default function Layout() {
             </NavLink>
             <NavLink to="/circolari" style={navStyle}>
               📣 Circolari
+            </NavLink>
+            <NavLink to="/utenti" style={navStyle}>
+              🔐 Utenti
             </NavLink>
             <NavLink to="/impostazioni" style={navStyle}>
               ⚙️ Impostazioni
