@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import get_current_user, require_admin
 from app.database import get_db
@@ -27,7 +27,7 @@ def list_members(
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),
 ):
-    q = db.query(Member)
+    q = db.query(Member).options(selectinload(Member.fees))
     if active_only:
         q = q.filter(Member.is_active == True)
     if ruolo:

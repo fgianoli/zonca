@@ -49,3 +49,9 @@ class Member(Base):
     documents = relationship(
         "MemberDocument", back_populates="member", cascade="all, delete-orphan"
     )
+
+    # Computed: quota per anno corrente pagata (dalla tabella fees)
+    @property
+    def fee_paid_current_year(self) -> bool:
+        current = date.today().year
+        return any(f.paid for f in (self.fees or []) if f.year == current)

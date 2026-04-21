@@ -100,7 +100,7 @@ export default function SociPage() {
       const s = certStatus(m.medical_cert_expiry).key;
       return s === "expired" || s === "missing";
     }).length;
-    const paid = members.filter((m) => m.fee_paid && m.fee_year === currentYear).length;
+    const paid = members.filter((m) => m.fee_paid_current_year).length;
     const unpaid = members.length - paid;
     return { expiring, expired, paid, unpaid };
   }, [members]);
@@ -262,7 +262,7 @@ function StatCard({ label, value, color, icon }) {
 function MemberRow({ member, isAdmin, onDetail, onEdit, onDelete }) {
   const r = RUOLI[member.ruolo] || RUOLI.ospite;
   const cs = certStatus(member.medical_cert_expiry);
-  const feeOk = member.fee_paid && member.fee_year === currentYear;
+  const feeOk = !!member.fee_paid_current_year;
 
   return (
     <div
@@ -487,7 +487,9 @@ function DetailModal({ member, isAdmin, currentUser, onClose, onMemberChange }) 
         {tab === "documenti" && (
           <DocumentiTab member={member} canEdit={canEditThis} isAdmin={isAdmin} />
         )}
-        {tab === "quote" && <QuoteTab member={member} isAdmin={isAdmin} />}
+        {tab === "quote" && (
+          <QuoteTab member={member} isAdmin={isAdmin} onMemberReload={onMemberChange} />
+        )}
       </div>
     </div>
   );
@@ -828,20 +830,31 @@ function DocumentiTab({ member, canEdit, isAdmin }) {
   );
 }
 
-function QuoteTab({ member, isAdmin }) {
+const DEFAULT_FEE_AMOUNT = 50;
+
+const emptyFeeForm = () => ({
+  year: currentYear,
+  amount: DEFAULT_FEE_AMOUNT,
+  payment_method: "bonifico",
+  paid: true,
+  paid_date: today(),
+  receipt_number: "",
+  note: "",
+});
+
+function QuoteTab({ member, isAdmin, onMemberReload }) {
   const [fees, setFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
+  const [msgKind, setMsgKind] = useState("ok"); // "ok" | "err"
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({
-    year: currentYear,
-    amount: 0,
-    payment_method: "bonifico",
-    paid: false,
-    paid_date: "",
-    receipt_number: "",
-    note: "",
-  });
+  const [form, setForm] = useState(emptyFeeForm());
+
+  const showMsg = (text, kind = "ok") => {
+    setMsg(text);
+    setMsgKind(kind);
+    if (kind === "ok") setTimeout(() => setMsg(""), 2500);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -849,7 +862,7 @@ function QuoteTab({ member, isAdmin }) {
       const { data } = await feesApi.list({ member_id: member.id });
       setFees(data);
     } catch (e) {
-      // ignore
+      showMsg("Errore caricamento quote", "err");
     } finally {
       setLoading(false);
     }
@@ -859,22 +872,44 @@ function QuoteTab({ member, isAdmin }) {
     load();
   }, [member.id]);
 
+  const reloadAll = async () => {
+    await load();
+    // Refresh anche il parent (per aggiornare badge "pagata/non pagata" nella lista)
+    if (onMemberReload) {
+      try {
+        const { data } = await membersApi.get(member.id);
+        onMemberReload(data);
+      } catch {
+        // ignore
+      }
+    }
+  };
+
   const save = async () => {
+    if (!form.year || form.amount === "" || form.amount === null) {
+      showMsg("Anno e importo sono obbligatori", "err");
+      return;
+    }
     try {
-      await feesApi.create({ ...form, member_id: member.id });
+      const payload = {
+        ...form,
+        amount: Number(form.amount),
+        year: Number(form.year),
+        member_id: member.id,
+        paid_date: form.paid ? form.paid_date || today() : null,
+      };
+      await feesApi.create(payload);
       setAdding(false);
-      setForm({
-        year: currentYear,
-        amount: 0,
-        payment_method: "bonifico",
-        paid: false,
-        paid_date: "",
-        receipt_number: "",
-        note: "",
-      });
-      load();
+      setForm(emptyFeeForm());
+      await reloadAll();
+      showMsg("Quota salvata", "ok");
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      const detail = e.response?.data?.detail;
+      if (e.response?.status === 409) {
+        showMsg(`Esiste gia una quota per ${form.year}. Modificala dalla lista.`, "err");
+      } else {
+        showMsg(detail || "Errore salvataggio quota", "err");
+      }
     }
   };
 
@@ -884,19 +919,21 @@ function QuoteTab({ member, isAdmin }) {
         paid: !fee.paid,
         paid_date: !fee.paid ? today() : null,
       });
-      load();
+      await reloadAll();
+      showMsg(!fee.paid ? "Segnata come pagata" : "Segnata come non pagata", "ok");
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      showMsg(e.response?.data?.detail || "Errore aggiornamento", "err");
     }
   };
 
   const remove = async (fee) => {
-    if (!window.confirm(`Eliminare quota ${fee.year}?`)) return;
+    if (!window.confirm(`Eliminare la quota ${fee.year} di ${formatEuro(fee.amount)}?`)) return;
     try {
       await feesApi.remove(fee.id);
-      load();
+      await reloadAll();
+      showMsg("Quota eliminata", "ok");
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      showMsg(e.response?.data?.detail || "Errore eliminazione", "err");
     }
   };
 
@@ -1045,7 +1082,20 @@ function QuoteTab({ member, isAdmin }) {
         </div>
       )}
 
-      {msg && <div style={{ color: colors.red, fontSize: 12 }}>{msg}</div>}
+      {msg && (
+        <div
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            backgroundColor: msgKind === "ok" ? `${colors.green}22` : `${colors.red}22`,
+            color: msgKind === "ok" ? colors.green : colors.red,
+            border: `1px solid ${msgKind === "ok" ? colors.green : colors.red}66`,
+            fontSize: 13,
+          }}
+        >
+          {msg}
+        </div>
+      )}
     </div>
   );
 }

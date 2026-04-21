@@ -37,6 +37,7 @@ class MemberRead(BaseModel):
     medical_cert_reminded: bool
     fee_paid: bool
     fee_year: int | None
+    fee_paid_current_year: bool = False  # computed da tabella fees
     created_at: datetime
 
     model_config = {"from_attributes": True}

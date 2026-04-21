@@ -1,13 +1,24 @@
+// Light Venetian theme - easier to read
 export const colors = {
-  water: "#1a3a4a",
-  deep: "#0d2535",
-  foam: "#e8f4f8",
-  lagoon: "#2d7d9a",
-  gold: "#c8963e",
-  red: "#c0392b",
-  green: "#27ae60",
-  muted: "#6b8fa3",
-  orange: "#d35400",
+  // Backgrounds (chiari)
+  water: "#f5f1ea",   // sand / cream background principale
+  deep: "#ffffff",    // card / panel background
+  panel: "#faf7f2",   // alternate panel (subtle ivory)
+
+  // Testo
+  foam: "#1a3a4a",    // primary text (dark teal)
+  muted: "#6b7f8c",   // secondary text
+
+  // Accenti Venezia
+  lagoon: "#2d7d9a",  // primary action (teal)
+  gold: "#b8822f",    // headers / highlights (un po' piu scuro per contrasto su bg chiaro)
+  red: "#c0392b",     // destructive
+  green: "#16a34a",   // success
+  orange: "#d35400",  // warning
+
+  // Bordi
+  border: "#d9d0c0",  // neutral beige border
+  borderSoft: "#e9e2d4",
 };
 
 export const fonts = {
@@ -27,7 +38,7 @@ export const S = {
     fontWeight: 700,
     fontFamily: fonts.body,
     cursor: "pointer",
-    transition: "opacity .2s",
+    transition: "opacity .2s, background-color .2s",
   },
   btnSmall: {
     padding: "6px 12px",
@@ -40,7 +51,7 @@ export const S = {
   },
   btnGold: {
     backgroundColor: colors.gold,
-    color: colors.deep,
+    color: "#fff",
   },
   btnRed: {
     backgroundColor: colors.red,
@@ -52,14 +63,14 @@ export const S = {
   },
   btnGhost: {
     backgroundColor: "transparent",
-    border: `1px solid ${colors.lagoon}`,
+    border: `1px solid ${colors.border}`,
     color: colors.foam,
   },
   input: {
     width: "100%",
     padding: "10px 14px",
-    backgroundColor: colors.deep,
-    border: `1px solid ${colors.lagoon}44`,
+    backgroundColor: "#fff",
+    border: `1px solid ${colors.border}`,
     borderRadius: 6,
     color: colors.foam,
     fontSize: 14,
@@ -75,12 +86,14 @@ export const S = {
     letterSpacing: 1,
     marginBottom: 4,
     fontFamily: fonts.body,
+    fontWeight: 700,
   },
   card: {
     backgroundColor: colors.deep,
-    border: `1px solid ${colors.lagoon}33`,
+    border: `1px solid ${colors.border}`,
     borderRadius: 12,
     padding: 20,
+    boxShadow: "0 1px 3px rgba(26, 58, 74, 0.06)",
   },
   title: {
     fontFamily: fonts.display,
@@ -107,7 +120,7 @@ export const S = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(26, 58, 74, 0.45)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -115,14 +128,15 @@ export const S = {
     padding: 20,
   },
   modal: {
-    backgroundColor: colors.water,
-    border: `1px solid ${colors.lagoon}`,
+    backgroundColor: colors.deep,
+    border: `1px solid ${colors.border}`,
     borderRadius: 12,
     padding: 32,
     maxWidth: 600,
     width: "100%",
     maxHeight: "90vh",
     overflowY: "auto",
+    boxShadow: "0 10px 30px rgba(26, 58, 74, 0.2)",
   },
   container: {
     maxWidth: 1200,
@@ -133,10 +147,10 @@ export const S = {
 
 // Ruoli/tipi info
 export const RUOLI = {
-  pope: { label: "Pope", badge: "PP", desc: "Capitano / Responsabile", color: colors.gold, icon: "⚓" },
-  paron: { label: "Paron", badge: "PA", desc: "Proprietario barca", color: colors.orange, icon: "🏛" },
-  provin: { label: "Provin", badge: "PV", desc: "Vogatore", color: colors.lagoon, icon: "🚣" },
-  ospite: { label: "Ospite", badge: "OS", desc: "Non socio", color: colors.muted, icon: "👤" },
+  pope: { label: "Pope", badge: "PP", desc: "Capitano / Responsabile", color: "#b8822f", icon: "⚓" },
+  paron: { label: "Paron", badge: "PA", desc: "Proprietario barca", color: "#d35400", icon: "🏛" },
+  provin: { label: "Provin", badge: "PV", desc: "Vogatore", color: "#2d7d9a", icon: "🚣" },
+  ospite: { label: "Ospite", badge: "OS", desc: "Non socio", color: "#6b7f8c", icon: "👤" },
 };
 
 export const TIPI_BARCA = {
