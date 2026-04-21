@@ -166,10 +166,16 @@ export default function WeatherWidget() {
               key={day.date}
               style={{
                 backgroundColor: colors.deep,
-                border: `1px solid ${colors.lagoon}33`,
-                borderRadius: 8,
-                padding: 12,
+                border: `1px solid ${colors.borderSoft}`,
+                borderRadius: 12,
+                padding: "16px 12px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
                 textAlign: "center",
+                boxShadow: colors.shadowSoft,
               }}
             >
               <div
@@ -177,18 +183,41 @@ export default function WeatherWidget() {
                   color: colors.muted,
                   fontSize: 11,
                   textTransform: "uppercase",
-                  marginBottom: 4,
+                  letterSpacing: 1,
+                  fontWeight: 600,
                 }}
               >
                 {formatDay(day.date)}
               </div>
-              <div style={{ fontSize: 28 }}>{dwc.icon}</div>
-              <div style={{ color: colors.foam, fontSize: 13, marginTop: 4 }}>
+              <div style={{ fontSize: 34, lineHeight: 1 }}>{dwc.icon}</div>
+              <div
+                style={{
+                  color: colors.foam,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  fontFamily: fonts.body,
+                }}
+              >
                 {Math.round(day.temp_min)}° / {Math.round(day.temp_max)}°
               </div>
-              <div style={{ color: colors.muted, fontSize: 10, marginTop: 4 }}>
-                💨 {Math.round(day.wind_max)} · 💧{" "}
-                {Math.round(day.rain_probability || 0)}%
+              <div
+                style={{
+                  color: colors.muted,
+                  fontSize: 11,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  width: "100%",
+                }}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  💨 {Math.round(day.wind_max)}
+                </span>
+                <span style={{ color: colors.faint }}>·</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  💧 {Math.round(day.rain_probability || 0)}%
+                </span>
               </div>
             </div>
           );
