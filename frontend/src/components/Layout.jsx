@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { colors, fonts } from "../styles/theme";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const navStyle = ({ isActive }) => ({
   padding: "10px 16px",
@@ -19,6 +21,7 @@ const navStyle = ({ isActive }) => ({
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -84,24 +87,48 @@ export default function Layout() {
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: "9px 18px",
-            background: "transparent",
-            border: `1.5px solid ${colors.border}`,
-            color: colors.foam,
-            borderRadius: 10,
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 600,
-            fontFamily: fonts.body,
-            transition: "all .15s ease",
-          }}
-        >
-          Esci
-        </button>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            onClick={() => setShowChangePassword(true)}
+            style={{
+              padding: "9px 14px",
+              background: "transparent",
+              border: `1.5px solid ${colors.border}`,
+              color: colors.foam,
+              borderRadius: 10,
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              fontFamily: fonts.body,
+              transition: "all .15s ease",
+            }}
+            title="Cambia password"
+          >
+            🔑 Password
+          </button>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "9px 18px",
+              background: "transparent",
+              border: `1.5px solid ${colors.border}`,
+              color: colors.foam,
+              borderRadius: 10,
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              fontFamily: fonts.body,
+              transition: "all .15s ease",
+            }}
+          >
+            Esci
+          </button>
+        </div>
       </header>
+
+      {showChangePassword && (
+        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+      )}
 
       {/* Nav */}
       <nav
@@ -125,6 +152,12 @@ export default function Layout() {
         </NavLink>
         <NavLink to="/prenotazioni" style={navStyle}>
           📋 Prenotazioni
+        </NavLink>
+        <NavLink to="/eventi" style={navStyle}>
+          🎉 Eventi
+        </NavLink>
+        <NavLink to="/profilo" style={navStyle}>
+          👤 Profilo
         </NavLink>
         {isPopeOrAdmin && (
           <NavLink to="/presenze" style={navStyle}>

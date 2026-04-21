@@ -139,6 +139,55 @@ export const contactApi = {
   send: (data) => api.post("/api/contact/", data),
 };
 
+// ── iCal ──────────────────────────────────────────
+export const icalApi = {
+  generateToken: () => api.post("/api/ical/token"),
+  revokeToken: () => api.delete("/api/ical/token"),
+};
+
+// ── Exports ───────────────────────────────────────
+export const exportsApi = {
+  members: () => api.get("/api/export/members.csv", { responseType: "blob" }),
+  fees: (year) => api.get("/api/export/fees.csv", { params: { year }, responseType: "blob" }),
+  finance: (dateFrom, dateTo) =>
+    api.get("/api/export/finance.csv", {
+      params: { date_from: dateFrom, date_to: dateTo },
+      responseType: "blob",
+    }),
+  attendance: (dateFrom, dateTo) =>
+    api.get("/api/export/attendance.csv", {
+      params: { date_from: dateFrom, date_to: dateTo },
+      responseType: "blob",
+    }),
+  bookings: (dateFrom, dateTo) =>
+    api.get("/api/export/bookings.csv", {
+      params: { date_from: dateFrom, date_to: dateTo },
+      responseType: "blob",
+    }),
+};
+
+// ── Events ────────────────────────────────────────
+export const eventsApi = {
+  list: (params = {}) => api.get("/api/events/", { params }),
+  listPublic: () => api.get("/api/events/public"),
+  get: (id) => api.get(`/api/events/${id}`),
+  create: (data) => api.post("/api/events/", data),
+  update: (id, data) => api.patch(`/api/events/${id}`, data),
+  remove: (id) => api.delete(`/api/events/${id}`),
+  register: (eventId, data) => api.post(`/api/events/${eventId}/register`, data),
+  unregister: (eventId, memberId) => api.delete(`/api/events/${eventId}/register/${memberId}`),
+  confirmRegistration: (eventId, regId) => api.post(`/api/events/${eventId}/registrations/${regId}/confirm`),
+};
+
+// ── Maintenance ───────────────────────────────────
+export const maintenanceApi = {
+  list: (params = {}) => api.get("/api/maintenance/", { params }),
+  byBoat: (boatId) => api.get(`/api/maintenance/boat/${boatId}`),
+  create: (data) => api.post("/api/maintenance/", data),
+  update: (id, data) => api.patch(`/api/maintenance/${id}`, data),
+  remove: (id) => api.delete(`/api/maintenance/${id}`),
+};
+
 // ── Helpers ───────────────────────────────────────
 export const downloadBlob = (response, filename) => {
   const url = window.URL.createObjectURL(new Blob([response.data]));

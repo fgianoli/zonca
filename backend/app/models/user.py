@@ -19,6 +19,9 @@ class User(Base):
         ForeignKey("members.id", ondelete="SET NULL")
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    ical_token: Mapped[str | None] = mapped_column(
+        String(64), unique=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

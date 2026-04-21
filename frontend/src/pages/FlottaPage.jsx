@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { boatsApi } from "../api/services";
 import { colors, fonts, S, TIPI_BARCA, formatDate } from "../styles/theme";
 import Modal from "../components/Modal";
+import BoatMaintenanceModal from "../components/BoatMaintenanceModal";
 import { useAuth } from "../context/AuthContext";
 
 const BOAT_COLORS = [
@@ -47,6 +48,7 @@ export default function FlottaPage() {
   const [form, setForm] = useState(EMPTY_BOAT);
   const [confirmDel, setConfirmDel] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [maintenanceBoat, setMaintenanceBoat] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -409,6 +411,20 @@ export default function FlottaPage() {
                         </div>
                       )}
 
+                      <button
+                        onClick={() => setMaintenanceBoat(b)}
+                        style={{
+                          ...S.btnSmall,
+                          marginTop: 10,
+                          width: "100%",
+                          background: `${colors.gold}15`,
+                          color: colors.gold,
+                          border: `1px solid ${colors.gold}44`,
+                        }}
+                      >
+                        🔧 Manutenzioni
+                      </button>
+
                       {isAdmin && (
                         <>
                           <label
@@ -635,6 +651,14 @@ export default function FlottaPage() {
             </button>
           </div>
         </Modal>
+      )}
+
+      {/* Maintenance modal */}
+      {maintenanceBoat && (
+        <BoatMaintenanceModal
+          boat={maintenanceBoat}
+          onClose={() => setMaintenanceBoat(null)}
+        />
       )}
 
       {/* Confirm delete */}

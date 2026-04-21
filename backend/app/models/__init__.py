@@ -8,11 +8,16 @@ from app.models.fee import Fee
 from app.models.document import MemberDocument
 from app.models.finance import FinanceRecord
 from app.models.circular import Circular
+from app.models.event import Event, EventRegistration
+from app.models.maintenance import Maintenance
 
 __all__ = [
     "AppSetting",
     "Attendance",
     "Circular",
+    "Event",
+    "EventRegistration",
+    "Maintenance",
     "Member",
     "User",
     "Boat",

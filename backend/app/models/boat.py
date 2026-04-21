@@ -35,6 +35,9 @@ class Boat(Base):
     # Relationships
     bookings = relationship("Booking", back_populates="boat")
     attendances = relationship("Attendance", back_populates="boat")
+    maintenances = relationship(
+        "Maintenance", back_populates="boat", cascade="all, delete-orphan"
+    )
 
     @hybrid_property
     def available(self) -> bool:

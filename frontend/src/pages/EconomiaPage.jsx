@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { financeApi, membersApi } from "../api/services";
+import { financeApi, membersApi, exportsApi, downloadBlob } from "../api/services";
 import { S, colors, fonts, formatDate, formatEuro, todayStr } from "../styles/theme";
 import Modal from "../components/Modal";
 
@@ -163,9 +163,27 @@ export default function EconomiaPage() {
           <h1 style={S.title}>Economia</h1>
           <p style={S.subtitle}>Registrazioni entrate e uscite</p>
         </div>
-        <button style={{ ...S.btn, ...S.btnGold }} onClick={openNew}>
-          + Nuova registrazione
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            style={{ ...S.btn, ...S.btnGhost }}
+            onClick={async () => {
+              try {
+                const from = filters.date_from || "";
+                const to = filters.date_to || "";
+                const res = await exportsApi.finance(from, to);
+                const label = from || to ? `${from || "inizio"}_${to || "oggi"}` : "tutti";
+                downloadBlob(res, `movimenti_${label}.csv`);
+              } catch (e) {
+                alert(e.response?.data?.detail || "Errore export");
+              }
+            }}
+          >
+            📥 Esporta CSV
+          </button>
+          <button style={{ ...S.btn, ...S.btnGold }} onClick={openNew}>
+            + Nuova registrazione
+          </button>
+        </div>
       </div>
 
       {/* Summary */}

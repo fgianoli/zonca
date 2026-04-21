@@ -20,6 +20,8 @@ import EconomiaPage from "./pages/EconomiaPage";
 import CircolariPage from "./pages/CircolariPage";
 import ImpostazioniPage from "./pages/ImpostazioniPage";
 import UtentiPage from "./pages/UtentiPage";
+import ProfiloPage from "./pages/ProfiloPage";
+import EventiPage from "./pages/EventiPage";
 
 import { colors, fonts } from "./styles/theme";
 
@@ -127,6 +129,8 @@ export default function App() {
             <Route path="/flotta" element={<FlottaPage />} />
             <Route path="/soci" element={<SociPage />} />
             <Route path="/prenotazioni" element={<PrenotazioniPage />} />
+            <Route path="/eventi" element={<EventiPage />} />
+            <Route path="/profilo" element={<ProfiloPage />} />
           </Route>
 
           {/* Protected - pope+admin */}

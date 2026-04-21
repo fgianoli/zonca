@@ -4,6 +4,7 @@ import {
   membersApi,
   documentsApi,
   feesApi,
+  exportsApi,
   downloadBlob,
 } from "../api/services";
 import Modal from "../components/Modal";
@@ -125,12 +126,27 @@ export default function SociPage() {
           <div style={S.subtitle}>{members.length} iscritti • gestione anagrafica, certificati, quote</div>
         </div>
         {isAdmin && (
-          <button
-            onClick={() => setCreating(true)}
-            style={{ ...S.btn, ...S.btnGold, color: colors.deep }}
-          >
-            + Nuovo socio
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await exportsApi.members();
+                  downloadBlob(res, "soci.csv");
+                } catch (e) {
+                  alert(e.response?.data?.detail || "Errore export");
+                }
+              }}
+              style={{ ...S.btn, ...S.btnGhost }}
+            >
+              📥 Esporta CSV
+            </button>
+            <button
+              onClick={() => setCreating(true)}
+              style={{ ...S.btn, ...S.btnGold, color: colors.deep }}
+            >
+              + Nuovo socio
+            </button>
+          </div>
         )}
       </div>
 

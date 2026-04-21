@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { bookingsApi } from "../api/services";
+import { bookingsApi, exportsApi, downloadBlob } from "../api/services";
 import { colors, fonts, S, TIPI_BARCA, formatDate } from "../styles/theme";
 
 const FILTERS = [
@@ -118,11 +118,29 @@ export default function PrenotazioniPage() {
 
   return (
     <div style={S.container}>
-      <div style={{ marginBottom: 20 }}>
-        <h1 style={S.title}>Prenotazioni</h1>
-        <div style={S.subtitle}>
-          {bookings.length} totali • {counts.attesa} in attesa di conferma
+      <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <h1 style={S.title}>Prenotazioni</h1>
+          <div style={S.subtitle}>
+            {bookings.length} totali • {counts.attesa} in attesa di conferma
+          </div>
         </div>
+        {isAdmin && (
+          <button
+            style={{ ...S.btn, ...S.btnGhost }}
+            onClick={async () => {
+              try {
+                const res = await exportsApi.bookings("", "");
+                downloadBlob(res, "prenotazioni.csv");
+              } catch (e) {
+                setMsg("");
+                setError(e.response?.data?.detail || "Errore export");
+              }
+            }}
+          >
+            📥 Esporta CSV
+          </button>
+        )}
       </div>
 
       {/* Filter tabs */}
