@@ -28,7 +28,18 @@
       "Bash(\"/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe\")",
       "Bash([ -d \"$DEST\" ])",
       "Bash(rm -rf C:/Users/giano/AppData/Roaming/QGIS/QGIS4/profiles/default/python/plugins/water_connection_plugin_v5)",
-      "Bash(cp -r C:/Users/giano/Desktop/SVILUPPO/acea/water_connection_plugin_v5.0 C:/Users/giano/AppData/Roaming/QGIS/QGIS4/profiles/default/python/plugins/water_connection_plugin_v5)"
+      "Bash(cp -r C:/Users/giano/Desktop/SVILUPPO/acea/water_connection_plugin_v5.0 C:/Users/giano/AppData/Roaming/QGIS/QGIS4/profiles/default/python/plugins/water_connection_plugin_v5)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(openssl rand *)",
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(curl -s -o /dev/null -w \"docs: %{http_code}\\\\n\" http://localhost:8000/docs)",
+      "Bash(docker exec *)",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@scuolazonca.it\",\"password\":\"admin123\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@scuolazonca.it\",\"password\":\"admin123\"}')",
+      "Bash(curl -s http://localhost:8000/api/weather/current)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8080/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8000/docs)"
     ]
   }
 }

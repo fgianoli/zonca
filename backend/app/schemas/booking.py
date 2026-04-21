@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date as _date, datetime
 from enum import Enum
 
 from pydantic import BaseModel
@@ -19,7 +19,7 @@ class TimeSlot(str, Enum):
 
 
 class BookingCreate(BaseModel):
-    date: date
+    date: _date
     slot: TimeSlot
     boat_id: int
     pope_id: int
@@ -29,7 +29,7 @@ class BookingCreate(BaseModel):
 
 class BookingRead(BaseModel):
     id: int
-    date: date
+    date: _date
     slot: TimeSlot
     boat_id: int
     pope_id: int
@@ -44,7 +44,7 @@ class BookingRead(BaseModel):
 
 
 class BookingUpdate(BaseModel):
-    date: date | None = None
+    date: _date | None = None
     slot: TimeSlot | None = None
     boat_id: int | None = None
     pope_id: int | None = None

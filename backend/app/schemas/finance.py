@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date as _date, datetime
 from decimal import Decimal
 from enum import Enum
 
@@ -23,7 +23,7 @@ class FinanceCategory(str, Enum):
 
 
 class FinanceCreate(BaseModel):
-    date: date
+    date: _date
     type: TransactionType
     amount: Decimal
     category: FinanceCategory
@@ -34,7 +34,7 @@ class FinanceCreate(BaseModel):
 
 class FinanceRead(BaseModel):
     id: int
-    date: date
+    date: _date
     type: TransactionType
     amount: Decimal
     category: str
@@ -49,7 +49,7 @@ class FinanceRead(BaseModel):
 
 
 class FinanceUpdate(BaseModel):
-    date: date | None = None
+    date: _date | None = None
     type: TransactionType | None = None
     amount: Decimal | None = None
     category: FinanceCategory | None = None
