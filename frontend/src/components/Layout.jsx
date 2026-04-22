@@ -59,7 +59,7 @@ export default function Layout() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <img
-            src="/logo_zonca.jpg"
+            src="/logo_zonca.png"
             alt="Zonca"
             style={{
               height: 46,

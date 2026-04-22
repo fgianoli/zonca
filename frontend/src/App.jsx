@@ -87,7 +87,7 @@ function HomePage() {
           </a>
         </div>
         <img
-          src="/logo_zonca.jpg"
+          src="/logo_zonca.png"
           alt="Logo Remiera Zonca"
           style={{
             height: 140,

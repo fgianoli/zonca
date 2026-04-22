@@ -49,7 +49,7 @@ export default function LoginPage() {
       >
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <img
-            src="/logo_zonca.jpg"
+            src="/logo_zonca.png"
             alt="Zonca"
             style={{
               height: 100,
