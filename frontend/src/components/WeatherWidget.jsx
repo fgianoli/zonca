@@ -98,11 +98,11 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
           borderBottom: `1px solid ${tl.color}33`,
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 12,
           flexWrap: "wrap",
         }}
       >
-        <span style={{ fontSize: 22 }}>{tl.light}</span>
+        <span style={{ fontSize: 22, flexShrink: 0 }}>{tl.light}</span>
         <div style={{ flex: 1, minWidth: 160 }}>
           <div
             style={{
@@ -118,6 +118,18 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
           <div style={{ color: colors.foam, fontSize: 14, fontWeight: 600 }}>
             {tl.label}
           </div>
+          {tl.reasons && tl.reasons.length > 0 && (
+            <div
+              style={{
+                color: colors.muted,
+                fontSize: 11,
+                marginTop: 2,
+                lineHeight: 1.3,
+              }}
+            >
+              {tl.reasons.join(" · ")}
+            </div>
+          )}
         </div>
       </div>
 
@@ -205,43 +217,6 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
           <Metric icon="💧" label="Umidità" value={`${Math.round(current.humidity)}%`} />
         )}
       </div>
-
-      {/* Reasons */}
-      {tl.reasons && tl.reasons.length > 0 && (
-        <div
-          style={{
-            padding: "10px 18px 12px",
-            borderTop: `1px solid ${colors.borderSoft}`,
-            background: colors.panel,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              color: colors.muted,
-              textTransform: "uppercase",
-              letterSpacing: 0.5,
-              marginBottom: 6,
-              fontWeight: 600,
-            }}
-          >
-            Motivazioni
-          </div>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: 18,
-              color: colors.foam,
-              fontSize: 13,
-              lineHeight: 1.5,
-            }}
-          >
-            {tl.reasons.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Forecast giorni successivi */}
       {data.forecast && data.forecast.length > 0 && (
@@ -580,7 +555,7 @@ export default function WeatherWidget() {
         {padova && (
           <SpotCard
             title="🏞 Padova"
-            subtitle="Bastione dell'Arena (Bacchiglione–Piovego)"
+            subtitle="Bacchiglione – Piovego"
             data={padova}
             showMarine={false}
           />
