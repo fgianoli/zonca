@@ -52,11 +52,9 @@ export default function LoginPage() {
             src="/logo_zonca.jpg"
             alt="Zonca"
             style={{
-              width: 90,
-              height: 90,
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: `3px solid ${colors.gold}`,
+              height: 100,
+              width: "auto",
+              objectFit: "contain",
               marginBottom: 16,
             }}
           />

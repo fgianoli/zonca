@@ -90,13 +90,11 @@ function HomePage() {
           src="/logo_zonca.jpg"
           alt="Logo Remiera Zonca"
           style={{
-            width: 130,
-            height: 130,
-            borderRadius: "50%",
-            objectFit: "cover",
-            marginBottom: 20,
-            boxShadow: "0 12px 32px rgba(8, 145, 178, 0.25)",
-            border: `4px solid #fff`,
+            height: 140,
+            width: "auto",
+            objectFit: "contain",
+            marginBottom: 16,
+            filter: "drop-shadow(0 8px 24px rgba(8, 145, 178, 0.18))",
           }}
         />
         <h1

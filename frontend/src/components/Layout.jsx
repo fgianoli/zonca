@@ -62,11 +62,10 @@ export default function Layout() {
             src="/logo_zonca.jpg"
             alt="Zonca"
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              objectFit: "cover",
-              boxShadow: "0 4px 12px rgba(8, 145, 178, 0.25)",
+              height: 46,
+              width: "auto",
+              objectFit: "contain",
+              filter: "drop-shadow(0 2px 6px rgba(8, 145, 178, 0.2))",
             }}
           />
           <div>

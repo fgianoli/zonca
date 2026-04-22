@@ -115,38 +115,50 @@ export default function WeatherWidget() {
       <div
         style={{
           backgroundColor: colors.deep,
-          border: `1px solid ${colors.lagoon}33`,
-          borderRadius: 12,
-          padding: 20,
+          border: `1px solid ${colors.borderSoft}`,
+          borderRadius: 14,
+          padding: "24px 20px",
           display: "flex",
           alignItems: "center",
-          gap: 20,
+          justifyContent: "center",
+          gap: 24,
           marginBottom: 12,
+          boxShadow: colors.shadowSoft,
         }}
       >
-        <div style={{ fontSize: 56 }}>{wc.icon}</div>
-        <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 64, lineHeight: 1 }}>{wc.icon}</div>
+        <div style={{ textAlign: "left" }}>
           <div
             style={{
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: 700,
               color: colors.foam,
               fontFamily: fonts.display,
+              lineHeight: 1,
             }}
           >
             {Math.round(current.temperature)}°C
           </div>
-          <div style={{ color: colors.muted, fontSize: 13 }}>{wc.label}</div>
+          <div style={{ color: colors.muted, fontSize: 14, marginTop: 4 }}>
+            {wc.label}
+          </div>
           <div
             style={{
               color: colors.muted,
               fontSize: 12,
-              marginTop: 4,
+              marginTop: 6,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
             }}
           >
-            💨 {Math.round(current.wind_speed)} km/h{" "}
-            {windDir(current.wind_direction)} · 💧{" "}
-            {Math.round(current.humidity)}%
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+              💨 {Math.round(current.wind_speed)} km/h {windDir(current.wind_direction)}
+            </span>
+            <span style={{ color: colors.faint }}>·</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+              💧 {Math.round(current.humidity)}%
+            </span>
           </div>
         </div>
       </div>
