@@ -89,41 +89,147 @@ async def _fetch_marine(lat: float, lon: float) -> dict:
         return resp.json()
 
 
+def _daily_traffic_light(
+    gusts_max: float | None,
+    rain_prob: float | None,
+    rain_sum: float | None = None,
+    wave_max: float | None = None,
+    is_marine: bool = False,
+) -> dict:
+    """Calcolo semaforo per un giorno futuro basato su massimi previsti."""
+    # Per la previsione uso criteri leggermente più conservativi
+    fake_conditions = {
+        "wind_gusts": gusts_max or 0,
+        "precipitation": rain_sum if rain_sum is not None else (
+            # Approssimazione: se prob > 70% consideriamo "piove parecchio"
+            5.0 if (rain_prob or 0) >= 70 else (2.0 if (rain_prob or 0) >= 40 else 0)
+        ),
+        "wave_height": wave_max or 0,
+    }
+    return compute_traffic_light(fake_conditions, is_marine=is_marine)
+
+
 def _build_padova_forecast(daily: dict) -> list[dict]:
     times = daily.get("time", []) or []
-    return [
-        {
-            "date": times[i],
-            "weather_code": daily["weather_code"][i],
-            "temp_max": daily["temperature_2m_max"][i],
-            "temp_min": daily["temperature_2m_min"][i],
-            "wind_max": daily["wind_speed_10m_max"][i],
-            "gusts_max": daily["wind_gusts_10m_max"][i],
-            "rain_probability": daily["precipitation_probability_max"][i],
-        }
-        for i in range(len(times))
-    ]
+    out = []
+    for i in range(len(times)):
+        gusts_max = daily["wind_gusts_10m_max"][i]
+        rain_prob = daily["precipitation_probability_max"][i]
+        rain_sum = (daily.get("precipitation_sum") or [None] * len(times))[i]
+        tl = _daily_traffic_light(gusts_max, rain_prob, rain_sum, is_marine=False)
+        out.append(
+            {
+                "date": times[i],
+                "weather_code": daily["weather_code"][i],
+                "temp_max": daily["temperature_2m_max"][i],
+                "temp_min": daily["temperature_2m_min"][i],
+                "wind_max": daily["wind_speed_10m_max"][i],
+                "gusts_max": gusts_max,
+                "rain_probability": rain_prob,
+                "rain_sum": rain_sum,
+                "traffic_light": tl,
+            }
+        )
+    return out
 
 
-def _current_tide_level(marine: dict) -> float | None:
-    """Estrae il valore sea_level_height_msl corrente (più vicino all'ora attuale)."""
+def _analyze_tide(marine: dict) -> dict:
+    """Analizza i dati di marea: valore corrente, trend, prossimi picchi.
+
+    Open-Meteo marine fornisce sea_level_height_msl come dato orario.
+    Calcoliamo:
+    - tide_level_m: valore attuale (ora corrente)
+    - tide_trend: "rising" | "falling" | "stable"
+    - next_high: { time, level_m } - prossimo massimo locale nelle prossime 24h
+    - next_low: { time, level_m } - prossimo minimo locale
+    """
+    result = {
+        "tide_level_m": None,
+        "tide_trend": None,
+        "next_high": None,
+        "next_low": None,
+        "tide_available": False,
+    }
+
     hourly = marine.get("hourly") or {}
-    levels = hourly.get("sea_level_height_msl")
-    times = hourly.get("time")
-    if not levels or not times:
-        return None
-    # Prendi l'ultimo valore disponibile non-null più vicino al current
-    current_time = (marine.get("current") or {}).get("time")
-    if current_time and current_time in times:
-        idx = times.index(current_time)
-        val = levels[idx]
-        if val is not None:
-            return float(val)
-    # Fallback: primo valore non nullo
-    for v in levels:
-        if v is not None:
-            return float(v)
-    return None
+    levels = hourly.get("sea_level_height_msl") or []
+    times = hourly.get("time") or []
+    if not levels or not times or len(levels) != len(times):
+        return result
+
+    from datetime import datetime
+
+    # Trova indice più vicino all'ora attuale (timezone Europe/Rome del payload)
+    now = datetime.now()
+    now_iso = now.strftime("%Y-%m-%dT%H:00")
+    current_idx = None
+    if now_iso in times:
+        current_idx = times.index(now_iso)
+    else:
+        # Trova l'indice più vicino
+        for i, t in enumerate(times):
+            try:
+                dt = datetime.fromisoformat(t)
+                if dt >= now:
+                    current_idx = max(0, i - 1)
+                    break
+            except Exception:
+                continue
+    if current_idx is None or current_idx >= len(levels):
+        current_idx = 0
+
+    curr = levels[current_idx]
+    if curr is None:
+        # prova il primo valore disponibile
+        for i, v in enumerate(levels):
+            if v is not None:
+                curr = v
+                current_idx = i
+                break
+
+    if curr is None:
+        return result
+
+    result["tide_level_m"] = float(curr)
+    result["tide_available"] = True
+
+    # Trend: confronta con ora successiva
+    trend = "stable"
+    for j in range(current_idx + 1, min(current_idx + 4, len(levels))):
+        nxt = levels[j]
+        if nxt is None:
+            continue
+        delta = nxt - curr
+        if delta > 0.02:
+            trend = "rising"
+        elif delta < -0.02:
+            trend = "falling"
+        break
+    result["tide_trend"] = trend
+
+    # Trova prossimi picchi (max/min locali) dalle ore future
+    future_levels = []
+    future_times = []
+    for i in range(current_idx, min(current_idx + 48, len(levels))):
+        if levels[i] is not None:
+            future_levels.append(float(levels[i]))
+            future_times.append(times[i])
+
+    if len(future_levels) >= 3:
+        for i in range(1, len(future_levels) - 1):
+            lv = future_levels[i]
+            prev_v = future_levels[i - 1]
+            next_v = future_levels[i + 1]
+            # Massimo locale
+            if result["next_high"] is None and lv > prev_v and lv >= next_v:
+                result["next_high"] = {"time": future_times[i], "level_m": lv}
+            # Minimo locale
+            if result["next_low"] is None and lv < prev_v and lv <= next_v:
+                result["next_low"] = {"time": future_times[i], "level_m": lv}
+            if result["next_high"] and result["next_low"]:
+                break
+
+    return result
 
 
 async def _padova_payload() -> dict:
@@ -152,11 +258,16 @@ async def _padova_payload() -> dict:
     traffic = compute_traffic_light(current_clean, is_marine=False)
 
     return {
-        "location": "Padova / Bacinetto",
+        "location": "Padova",
         "current": current_clean,
         "wind_alert": (current_clean["wind_gusts"] or 0) > 30,
         "forecast": _build_padova_forecast(daily),
         "traffic_light": traffic,
+        "source": {
+            "name": "Open-Meteo",
+            "url": "https://open-meteo.com/",
+            "attribution": "Dati meteo forniti da Open-Meteo (CC-BY 4.0)",
+        },
     }
 
 
@@ -182,7 +293,13 @@ async def _laguna_payload() -> dict:
     m_current = marine_data.get("current", {}) or {}
     m_daily = marine_data.get("daily", {}) or {}
 
-    tide_level = _current_tide_level(marine_data) if marine_data else None
+    tide = _analyze_tide(marine_data) if marine_data else {
+        "tide_level_m": None,
+        "tide_trend": None,
+        "next_high": None,
+        "next_low": None,
+        "tide_available": False,
+    }
 
     current_clean = {
         "temperature": w_current.get("temperature_2m"),
@@ -193,8 +310,11 @@ async def _laguna_payload() -> dict:
         "wave_height": m_current.get("wave_height"),
         "wave_period": m_current.get("wave_period"),
         "wave_direction": m_current.get("wave_direction"),
-        "tide_level_m": tide_level,
-        "tide_available": tide_level is not None,
+        "tide_level_m": tide["tide_level_m"],
+        "tide_trend": tide["tide_trend"],
+        "tide_next_high": tide["next_high"],
+        "tide_next_low": tide["next_low"],
+        "tide_available": tide["tide_available"],
     }
 
     traffic = compute_traffic_light(current_clean, is_marine=True)
@@ -202,30 +322,52 @@ async def _laguna_payload() -> dict:
     # Forecast combinato weather + marine per giorno
     w_times = w_daily.get("time", []) or []
     m_times = m_daily.get("time", []) or []
+    rain_sum_list = w_daily.get("precipitation_sum") or [None] * len(w_times)
     forecast = []
     for i, d in enumerate(w_times):
-        entry = {
-            "date": d,
-            "weather_code": w_daily["weather_code"][i],
-            "temp_max": w_daily["temperature_2m_max"][i],
-            "temp_min": w_daily["temperature_2m_min"][i],
-            "wind_max": w_daily["wind_speed_10m_max"][i],
-            "gusts_max": w_daily["wind_gusts_10m_max"][i],
-            "rain_probability": w_daily["precipitation_probability_max"][i],
-            "wave_height_max": None,
-            "wave_period_max": None,
-        }
+        gusts_max = w_daily["wind_gusts_10m_max"][i]
+        rain_prob = w_daily["precipitation_probability_max"][i]
+        rain_sum = rain_sum_list[i] if i < len(rain_sum_list) else None
+        wave_max = None
+        wave_period = None
         if d in m_times:
             j = m_times.index(d)
-            entry["wave_height_max"] = (m_daily.get("wave_height_max") or [None])[j] if j < len(m_daily.get("wave_height_max") or []) else None
-            entry["wave_period_max"] = (m_daily.get("wave_period_max") or [None])[j] if j < len(m_daily.get("wave_period_max") or []) else None
-        forecast.append(entry)
+            wave_max = (m_daily.get("wave_height_max") or [None])[j] if j < len(m_daily.get("wave_height_max") or []) else None
+            wave_period = (m_daily.get("wave_period_max") or [None])[j] if j < len(m_daily.get("wave_period_max") or []) else None
+        tl = _daily_traffic_light(
+            gusts_max=gusts_max,
+            rain_prob=rain_prob,
+            rain_sum=rain_sum,
+            wave_max=wave_max,
+            is_marine=True,
+        )
+        forecast.append(
+            {
+                "date": d,
+                "weather_code": w_daily["weather_code"][i],
+                "temp_max": w_daily["temperature_2m_max"][i],
+                "temp_min": w_daily["temperature_2m_min"][i],
+                "wind_max": w_daily["wind_speed_10m_max"][i],
+                "gusts_max": gusts_max,
+                "rain_probability": rain_prob,
+                "rain_sum": rain_sum,
+                "wave_height_max": wave_max,
+                "wave_period_max": wave_period,
+                "traffic_light": tl,
+            }
+        )
 
     return {
         "location": "Laguna di Venezia",
         "current": current_clean,
         "forecast": forecast,
         "traffic_light": traffic,
+        "source": {
+            "name": "Open-Meteo",
+            "url": "https://open-meteo.com/",
+            "attribution": "Dati meteo + marine forniti da Open-Meteo (CC-BY 4.0)",
+            "marine_api": "https://marine-api.open-meteo.com/",
+        },
     }
 
 

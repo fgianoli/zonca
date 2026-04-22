@@ -198,17 +198,7 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
                   : "—"
               }
             />
-            <Metric
-              icon="🌀"
-              label="Marea"
-              value={
-                current.tide != null
-                  ? `${Number(current.tide).toFixed(2)} m`
-                  : current.sea_level != null
-                  ? `${Number(current.sea_level).toFixed(2)} m`
-                  : "—"
-              }
-            />
+            <TideMetric current={current} />
           </>
         )}
         {!showMarine && current.humidity != null && (
@@ -220,7 +210,7 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
       {tl.reasons && tl.reasons.length > 0 && (
         <div
           style={{
-            padding: "10px 18px 16px",
+            padding: "10px 18px 12px",
             borderTop: `1px solid ${colors.borderSoft}`,
             background: colors.panel,
           }}
@@ -252,6 +242,157 @@ function SpotCard({ title, subtitle, data, showMarine = false }) {
           </ul>
         </div>
       )}
+
+      {/* Forecast giorni successivi */}
+      {data.forecast && data.forecast.length > 0 && (
+        <div
+          style={{
+            padding: "14px 18px 12px",
+            borderTop: `1px solid ${colors.borderSoft}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              color: colors.muted,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              marginBottom: 10,
+              fontWeight: 600,
+            }}
+          >
+            Previsioni {showMarine ? "laguna" : "Padova"}
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${data.forecast.length}, 1fr)`,
+              gap: 8,
+            }}
+          >
+            {data.forecast.map((day, idx) => (
+              <ForecastDay key={day.date} day={day} idx={idx} showMarine={showMarine} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Source / attribution */}
+      {data.source && (
+        <div
+          style={{
+            padding: "10px 18px 14px",
+            borderTop: `1px solid ${colors.borderSoft}`,
+            fontSize: 10,
+            color: colors.faint,
+            textAlign: "center",
+          }}
+        >
+          Fonte:{" "}
+          <a
+            href={data.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.muted, textDecoration: "none", fontWeight: 600 }}
+          >
+            {data.source.name}
+          </a>
+          {data.source.attribution && (
+            <span style={{ marginLeft: 6 }}>· {data.source.attribution}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ForecastDay({ day, idx, showMarine }) {
+  const wc = WEATHER_CODES[day.weather_code] || { icon: "🌡" };
+  const tl = day.traffic_light || { status: "green", reasons: [] };
+  const lightIcon = tl.status === "red" ? "🔴" : tl.status === "yellow" ? "🟡" : "🟢";
+  const tlColor =
+    tl.status === "red" ? colors.red : tl.status === "yellow" ? colors.gold : colors.green;
+
+  const label = (() => {
+    if (idx === 0) return "Oggi";
+    const d = new Date(day.date);
+    return d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric" });
+  })();
+
+  const reasonText = (tl.reasons || []).join(", ");
+
+  return (
+    <div
+      title={reasonText || "Condizioni buone"}
+      style={{
+        background: colors.panel,
+        border: `1px solid ${tlColor}33`,
+        borderRadius: 10,
+        padding: "10px 8px",
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 4,
+        cursor: reasonText ? "help" : "default",
+      }}
+    >
+      <div
+        style={{
+          color: colors.muted,
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+          fontWeight: 700,
+        }}
+      >
+        {label}
+      </div>
+      <div style={{ fontSize: 22, lineHeight: 1 }}>{wc.icon}</div>
+      <div
+        style={{
+          color: colors.foam,
+          fontSize: 12,
+          fontWeight: 600,
+          fontFamily: fonts.body,
+        }}
+      >
+        {Math.round(day.temp_min)}° / {Math.round(day.temp_max)}°
+      </div>
+      <div
+        style={{
+          fontSize: 10,
+          color: colors.muted,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <span>💨 {Math.round(day.gusts_max)}</span>
+        {showMarine && day.wave_height_max != null && (
+          <>
+            <span style={{ color: colors.faint }}>·</span>
+            <span>🌊 {Number(day.wave_height_max).toFixed(1)}</span>
+          </>
+        )}
+        {!showMarine && day.rain_probability != null && (
+          <>
+            <span style={{ color: colors.faint }}>·</span>
+            <span>💧 {Math.round(day.rain_probability)}%</span>
+          </>
+        )}
+      </div>
+      <div
+        style={{
+          marginTop: 2,
+          fontSize: 14,
+          lineHeight: 1,
+        }}
+      >
+        {lightIcon}
+      </div>
     </div>
   );
 }
@@ -271,6 +412,112 @@ function Metric({ icon, label, value }) {
       <div style={{ color: colors.foam, fontSize: 14, fontWeight: 700, marginTop: 2 }}>
         {value}
       </div>
+    </div>
+  );
+}
+
+function TideMetric({ current }) {
+  const level = current?.tide_level_m;
+  const trend = current?.tide_trend; // rising | falling | stable | null
+  const nextHigh = current?.tide_next_high;
+  const nextLow = current?.tide_next_low;
+
+  if (level == null && !current?.tide_available) {
+    return (
+      <div style={{ background: colors.panel, borderRadius: 10, padding: "8px 10px" }}>
+        <div style={{ color: colors.muted, fontSize: 11, fontWeight: 600 }}>🌀 Marea</div>
+        <div style={{ color: colors.faint, fontSize: 12, marginTop: 2 }}>n.d.</div>
+      </div>
+    );
+  }
+
+  const trendIcon = trend === "rising" ? "↑" : trend === "falling" ? "↓" : "→";
+  const trendLabel =
+    trend === "rising" ? "crescente" : trend === "falling" ? "calante" : "stabile";
+  const trendColor =
+    trend === "rising" ? colors.green : trend === "falling" ? colors.orange : colors.muted;
+
+  const formatTime = (iso) => {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      const today = new Date();
+      const sameDay = d.toDateString() === today.toDateString();
+      const hm = d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+      return sameDay
+        ? hm
+        : `${d.toLocaleDateString("it-IT", { weekday: "short" })} ${hm}`;
+    } catch {
+      return iso;
+    }
+  };
+
+  const cm = (m) => `${Math.round(Number(m) * 100)} cm`;
+
+  return (
+    <div
+      style={{
+        background: colors.panel,
+        borderRadius: 10,
+        padding: "8px 10px",
+        gridColumn: "1 / -1", // occupa tutta la riga
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 2,
+        }}
+      >
+        <div style={{ color: colors.muted, fontSize: 11, fontWeight: 600 }}>🌀 Marea</div>
+        <div
+          style={{
+            color: trendColor,
+            fontSize: 11,
+            fontWeight: 700,
+          }}
+        >
+          {trendIcon} {trendLabel}
+        </div>
+      </div>
+      <div
+        style={{
+          color: colors.foam,
+          fontSize: 16,
+          fontWeight: 700,
+        }}
+      >
+        {level != null ? cm(level) : "—"}
+      </div>
+      {(nextHigh || nextLow) && (
+        <div
+          style={{
+            marginTop: 4,
+            paddingTop: 4,
+            borderTop: `1px solid ${colors.border}`,
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+            fontSize: 10,
+            color: colors.muted,
+          }}
+        >
+          {nextHigh && (
+            <span>
+              🔺 Alta {formatTime(nextHigh.time)}{" "}
+              <strong style={{ color: colors.foam }}>{cm(nextHigh.level_m)}</strong>
+            </span>
+          )}
+          {nextLow && (
+            <span>
+              🔻 Bassa {formatTime(nextLow.time)}{" "}
+              <strong style={{ color: colors.foam }}>{cm(nextLow.level_m)}</strong>
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -333,7 +580,7 @@ export default function WeatherWidget() {
         {padova && (
           <SpotCard
             title="🏞 Padova"
-            subtitle="Bacinetto di voga"
+            subtitle="Bastione dell'Arena (Bacchiglione–Piovego)"
             data={padova}
             showMarine={false}
           />
@@ -341,7 +588,7 @@ export default function WeatherWidget() {
         {laguna && (
           <SpotCard
             title="🌊 Laguna di Venezia"
-            subtitle="Condizioni in laguna"
+            subtitle="Bacino nord · vento, onde, marea"
             data={laguna}
             showMarine={true}
           />
