@@ -48,7 +48,9 @@
       "Bash(py -c \"import ast; files=['app/main.py','app/models/__init__.py','app/models/crew.py','app/models/gallery.py','app/models/email_template.py','app/models/invoice.py','app/models/gdpr.py','app/schemas/crew.py','app/schemas/gallery.py','app/schemas/email_template.py','app/schemas/invoice.py','app/api/crews.py','app/api/gallery.py','app/api/email_templates.py','app/api/invoices.py','app/api/gdpr.py','app/services/email_template.py','app/services/invoice_pdf.py','app/services/notifications.py']; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\)\\) for f in files]; print\\('OK'\\)\")",
       "Bash(/c/Users/giano/AppData/Local/Programs/Python/Python312/python.exe -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('location:',d.get\\('location'\\)\\);print\\('traffic:',d.get\\('traffic_light'\\)\\)\")",
       "Bash(curl -s http://localhost:8000/api/weather/laguna-venezia)",
-      "Bash(curl -s -o /dev/null -w \"Frontend: %{http_code}\\\\n\" http://localhost:8080/)"
+      "Bash(curl -s -o /dev/null -w \"Frontend: %{http_code}\\\\n\" http://localhost:8080/)",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)"
     ]
   }
 }

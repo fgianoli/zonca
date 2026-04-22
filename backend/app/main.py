@@ -1,4 +1,5 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,6 +9,22 @@ from fastapi.staticfiles import StaticFiles
 from app.api import attendance, auth, backups, boats, bookings, circulars, contact, crews, dashboard, documents, email_templates, events, exports, fees, finance, gallery, gdpr, ical, invoices, maintenance, members, settings, users, weather
 from app.services.backup import backup_loop
 from app.services.reminders import reminder_loop
+
+
+# CORS origins: da env CORS_ORIGINS (separati da virgola) + default production+dev
+_default_origins = [
+    "https://vogavenetazonca.it",
+    "https://www.vogavenetazonca.it",
+    "http://localhost",
+    "http://localhost:5173",
+    "http://localhost:8080",
+]
+_env_origins = [
+    o.strip()
+    for o in os.getenv("CORS_ORIGINS", "").split(",")
+    if o.strip()
+]
+CORS_ALLOW_ORIGINS = _env_origins or _default_origins
 
 
 @asynccontextmanager
@@ -29,7 +46,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:80", "http://localhost"],
+    allow_origins=CORS_ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
