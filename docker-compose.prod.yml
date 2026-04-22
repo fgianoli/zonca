@@ -1,0 +1,68 @@
+# Production deploy: frontend esposto solo alla rete di Nginx Proxy Manager.
+# Uso: docker compose -f docker-compose.prod.yml up -d --build
+#
+# Prerequisiti sul server:
+#   - Network "docker-stack_proxy" già esistente (quella di Nginx Proxy Manager)
+#   - File .env accanto a questo compose con le variabili di produzione
+#
+# NPM proxy host da configurare:
+#   - Scheme: http
+#   - Forward Hostname: zonca-web
+#   - Forward Port: 80
+#   - Enable: WebSockets, HTTP/2, Force SSL (Let's Encrypt)
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: zonca-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-zonca}
+      POSTGRES_USER: ${POSTGRES_USER:-zonca}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD obbligatoria}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zonca}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  backend:
+    build: ./backend
+    image: zonca-backend:latest
+    container_name: zonca-api
+    restart: unless-stopped
+    env_file: .env
+    # no --reload in produzione
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads  # certificati, documenti, foto, fatture, backup
+    networks:
+      - internal
+
+  frontend:
+    build: ./frontend
+    image: zonca-frontend:latest
+    container_name: zonca-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - internal   # per parlare col backend tramite nginx proxy_pass interno
+      - proxy      # per essere raggiunto da Nginx Proxy Manager
+
+networks:
+  internal:
+    name: zonca-internal
+  proxy:
+    external: true
+    name: docker-stack_proxy
+
+volumes:
+  pgdata:
+  uploads:
