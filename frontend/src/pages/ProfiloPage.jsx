@@ -6,6 +6,7 @@ import {
   feesApi,
   bookingsApi,
   icalApi,
+  gdprApi,
   downloadBlob,
 } from "../api/services";
 import { S, colors, fonts, RUOLI, formatDate, formatEuro, TIPI_BARCA } from "../styles/theme";
@@ -36,6 +37,7 @@ const TABS = [
   { id: "documenti", label: "Documenti", icon: "📁" },
   { id: "password", label: "Password", icon: "🔑" },
   { id: "ical", label: "iCal", icon: "📅" },
+  { id: "gdpr", label: "GDPR", icon: "🛡" },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -115,6 +117,181 @@ export default function ProfiloPage() {
         </div>
       )}
       {tab === "ical" && <IcalTab />}
+      {tab === "gdpr" && <GdprTab />}
+    </div>
+  );
+}
+
+// ── GDPR Tab ─────────────────────────────────────────────────────────────
+function GdprTab() {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
+  const [reason, setReason] = useState("");
+  const [confirm, setConfirm] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const downloadData = async () => {
+    setBusy(true);
+    setMsg("");
+    setErr("");
+    try {
+      const res = await gdprApi.myData();
+      const today = new Date().toISOString().split("T")[0];
+      downloadBlob(res, `miei_dati_zonca_${today}.json`);
+      setMsg("Download avviato ✓");
+    } catch (e) {
+      setErr(e.response?.data?.detail || "Errore durante il download");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitDelete = async () => {
+    if (!confirm) {
+      setErr("Devi confermare la richiesta");
+      return;
+    }
+    setBusy(true);
+    setMsg("");
+    setErr("");
+    try {
+      await gdprApi.requestDelete(reason);
+      setSent(true);
+      setShowDelete(false);
+      setReason("");
+      setConfirm(false);
+    } catch (e) {
+      setErr(e.response?.data?.detail || "Errore invio richiesta");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ display: "grid", gap: 16, maxWidth: 720 }}>
+      <div style={{ ...S.card }}>
+        <div
+          style={{
+            fontFamily: fonts.display,
+            fontSize: 17,
+            color: colors.lagoon,
+            fontWeight: 700,
+            marginBottom: 8,
+          }}
+        >
+          🛡 I tuoi diritti GDPR
+        </div>
+        <p style={{ color: colors.muted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+          Ai sensi degli articoli 15-22 del GDPR (Regolamento UE 2016/679) hai il diritto di
+          accedere ai tuoi dati personali, riceverli in formato portabile e richiederne la
+          cancellazione. Per maggiori dettagli consulta la{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: colors.lagoon, fontWeight: 600 }}
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
+      </div>
+
+      {msg && <Banner kind="ok">{msg}</Banner>}
+      {err && <Banner kind="err">{err}</Banner>}
+      {sent && (
+        <Banner kind="ok">
+          Richiesta inviata. L'amministratore prenderà in carico la tua richiesta entro 30 giorni.
+        </Banner>
+      )}
+
+      <div style={{ ...S.card, borderLeft: `4px solid ${colors.lagoon}` }}>
+        <div style={{ color: colors.foam, fontWeight: 700, marginBottom: 6 }}>
+          📥 Scarica i miei dati
+        </div>
+        <div style={{ color: colors.muted, fontSize: 13, marginBottom: 10, lineHeight: 1.6 }}>
+          Riceverai un file JSON con tutti i dati personali che la remiera conserva su di te
+          (anagrafica, quote, presenze, documenti).
+        </div>
+        <button onClick={downloadData} disabled={busy} style={S.btn}>
+          {busy ? "Preparazione…" : "📥 Scarica i miei dati"}
+        </button>
+      </div>
+
+      <div style={{ ...S.card, borderLeft: `4px solid ${colors.red}` }}>
+        <div style={{ color: colors.foam, fontWeight: 700, marginBottom: 6 }}>
+          🗑 Richiedi cancellazione
+        </div>
+        <div style={{ color: colors.muted, fontSize: 13, marginBottom: 10, lineHeight: 1.6 }}>
+          Invia una richiesta formale di cancellazione dei tuoi dati. Alcuni dati potranno
+          essere conservati per adempiere a obblighi fiscali.
+        </div>
+        {!showDelete ? (
+          <button onClick={() => setShowDelete(true)} style={{ ...S.btn, ...S.btnRed }}>
+            🗑 Richiedi cancellazione
+          </button>
+        ) : (
+          <div style={{ display: "grid", gap: 10 }}>
+            <div>
+              <label style={S.label}>Motivo (facoltativo)</label>
+              <textarea
+                style={{
+                  ...S.input,
+                  minHeight: 80,
+                  resize: "vertical",
+                  fontFamily: fonts.body,
+                }}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Per esempio: non sono più socio della remiera…"
+              />
+            </div>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 8,
+                color: colors.foam,
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={confirm}
+                onChange={(e) => setConfirm(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                Confermo di voler richiedere la cancellazione dei miei dati personali dal
+                gestionale della Remiera Zonca.
+              </span>
+            </label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => {
+                  setShowDelete(false);
+                  setReason("");
+                  setConfirm(false);
+                  setErr("");
+                }}
+                style={{ ...S.btn, ...S.btnGhost, flex: 1 }}
+              >
+                Annulla
+              </button>
+              <button
+                onClick={submitDelete}
+                disabled={busy || !confirm}
+                style={{ ...S.btn, ...S.btnRed, flex: 2, opacity: !confirm ? 0.5 : 1 }}
+              >
+                {busy ? "Invio…" : "Invia richiesta"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -10,15 +10,27 @@ from app.models.finance import FinanceRecord
 from app.models.circular import Circular
 from app.models.event import Event, EventRegistration
 from app.models.maintenance import Maintenance
+from app.models.crew import Crew, CrewMember
+from app.models.gallery import Photo, PhotoAlbum
+from app.models.email_template import EmailTemplate
+from app.models.invoice import Invoice
+from app.models.gdpr import GdprRequest
 
 __all__ = [
     "AppSetting",
     "Attendance",
     "Circular",
+    "Crew",
+    "CrewMember",
+    "EmailTemplate",
     "Event",
     "EventRegistration",
+    "GdprRequest",
+    "Invoice",
     "Maintenance",
     "Member",
+    "Photo",
+    "PhotoAlbum",
     "User",
     "Boat",
     "Booking",

@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { weatherApi } from "../api/services";
 import { colors, fonts } from "../styles/theme";
 
-// Open-Meteo weather code → emoji + label (sintesi)
 const WEATHER_CODES = {
   0: { icon: "☀️", label: "Sereno" },
-  1: { icon: "🌤", label: "Prevalent. sereno" },
+  1: { icon: "🌤", label: "Prev. sereno" },
   2: { icon: "⛅", label: "Parz. nuvoloso" },
   3: { icon: "☁️", label: "Nuvoloso" },
   45: { icon: "🌫", label: "Nebbia" },
@@ -28,212 +27,325 @@ const WEATHER_CODES = {
 };
 
 const windDir = (deg) => {
+  if (deg == null) return "";
   const dirs = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
   return dirs[Math.round(deg / 45) % 8];
 };
 
-const formatDay = (dateStr) => {
-  const d = new Date(dateStr);
-  const today = new Date().toISOString().split("T")[0];
-  if (dateStr === today) return "Oggi";
-  return d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric" });
-};
+// Traffic light evaluation from backend status or derived from values
+function trafficLight(data) {
+  // Prefer explicit status from backend
+  const s = data?.status || data?.rowing_status;
+  const reasons = data?.reasons || data?.status_reasons || [];
 
-export default function WeatherWidget() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    weatherApi
-      .current()
-      .then((res) => setData(res.data))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <section
-        style={{
-          maxWidth: 600,
-          margin: "0 auto",
-          padding: "20px",
-          color: colors.muted,
-          textAlign: "center",
-        }}
-      >
-        Caricamento meteo...
-      </section>
-    );
+  if (s) {
+    const lower = String(s).toLowerCase();
+    if (lower.includes("red") || lower.includes("rosso") || lower === "bad") {
+      return { light: "🔴", color: colors.red, label: "Condizioni sconsigliate", reasons };
+    }
+    if (lower.includes("yellow") || lower.includes("giallo") || lower === "warn") {
+      return { light: "🟡", color: colors.gold, label: "Attenzione", reasons };
+    }
+    return { light: "🟢", color: colors.green, label: "Condizioni buone", reasons };
   }
 
-  if (error || !data) return null;
+  // Fallback: derive from wind/gusts
+  const cur = data?.current || {};
+  const gust = cur.wind_gusts ?? cur.gusts ?? 0;
+  const wind = cur.wind_speed ?? 0;
+  const derived = [];
+  if (gust >= 35 || wind >= 25) {
+    if (gust >= 35) derived.push(`Raffiche ${Math.round(gust)} km/h`);
+    if (wind >= 25) derived.push(`Vento ${Math.round(wind)} km/h`);
+    return {
+      light: "🔴",
+      color: colors.red,
+      label: "Condizioni sconsigliate",
+      reasons: derived,
+    };
+  }
+  if (gust >= 20 || wind >= 15) {
+    if (gust >= 20) derived.push(`Raffiche ${Math.round(gust)} km/h`);
+    if (wind >= 15) derived.push(`Vento ${Math.round(wind)} km/h`);
+    return { light: "🟡", color: colors.gold, label: "Attenzione", reasons: derived };
+  }
+  return { light: "🟢", color: colors.green, label: "Condizioni buone", reasons: [] };
+}
 
+function SpotCard({ title, subtitle, data, showMarine = false }) {
+  if (!data) return null;
   const current = data.current || {};
-  const wc = WEATHER_CODES[current.weather_code] || { icon: "🌡", label: "-" };
+  const wc = WEATHER_CODES[current.weather_code] || { icon: "🌡", label: "—" };
+  const tl = trafficLight(data);
 
   return (
-    <section
+    <div
       style={{
-        maxWidth: 600,
-        margin: "0 auto",
-        padding: "24px 20px",
+        background: colors.deep,
+        border: `1px solid ${colors.borderSoft}`,
+        borderRadius: 16,
+        overflow: "hidden",
+        boxShadow: colors.shadowMed,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <h2
+      {/* Traffic light banner */}
+      <div
         style={{
-          fontFamily: fonts.display,
-          color: colors.gold,
-          fontSize: 24,
-          marginBottom: 12,
-          textAlign: "center",
+          padding: "12px 16px",
+          background: `${tl.color}12`,
+          borderBottom: `1px solid ${tl.color}33`,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
         }}
       >
-        Meteo Padova
-      </h2>
+        <span style={{ fontSize: 22 }}>{tl.light}</span>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <div
+            style={{
+              color: tl.color,
+              fontWeight: 700,
+              fontSize: 13,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+            }}
+          >
+            Condizioni voga
+          </div>
+          <div style={{ color: colors.foam, fontSize: 14, fontWeight: 600 }}>
+            {tl.label}
+          </div>
+        </div>
+      </div>
 
-      {data.wind_alert && (
+      {/* Header */}
+      <div style={{ padding: "16px 18px 0" }}>
         <div
           style={{
-            padding: "12px 16px",
-            backgroundColor: colors.red + "22",
-            border: `1px solid ${colors.red}`,
-            borderRadius: 8,
-            color: colors.red,
-            fontSize: 14,
-            marginBottom: 16,
-            textAlign: "center",
+            fontFamily: fonts.display,
+            color: colors.foam,
+            fontSize: 20,
             fontWeight: 700,
           }}
         >
-          ⚠️ Vento forte — raffiche fino a {Math.round(current.wind_gusts)} km/h
+          {title}
         </div>
-      )}
+        {subtitle && (
+          <div style={{ color: colors.muted, fontSize: 12, marginTop: 2 }}>{subtitle}</div>
+        )}
+      </div>
 
       {/* Current */}
       <div
         style={{
-          backgroundColor: colors.deep,
-          border: `1px solid ${colors.borderSoft}`,
-          borderRadius: 14,
-          padding: "24px 20px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 24,
-          marginBottom: 12,
-          boxShadow: colors.shadowSoft,
+          gap: 16,
+          padding: "14px 18px 8px",
         }}
       >
-        <div style={{ fontSize: 64, lineHeight: 1 }}>{wc.icon}</div>
-        <div style={{ textAlign: "left" }}>
+        <div style={{ fontSize: 52, lineHeight: 1 }}>{wc.icon}</div>
+        <div>
           <div
             style={{
-              fontSize: 36,
+              fontSize: 32,
               fontWeight: 700,
               color: colors.foam,
               fontFamily: fonts.display,
               lineHeight: 1,
             }}
           >
-            {Math.round(current.temperature)}°C
+            {current.temperature != null ? `${Math.round(current.temperature)}°C` : "—"}
           </div>
-          <div style={{ color: colors.muted, fontSize: 14, marginTop: 4 }}>
-            {wc.label}
-          </div>
-          <div
-            style={{
-              color: colors.muted,
-              fontSize: 12,
-              marginTop: 6,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-              💨 {Math.round(current.wind_speed)} km/h {windDir(current.wind_direction)}
-            </span>
-            <span style={{ color: colors.faint }}>·</span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-              💧 {Math.round(current.humidity)}%
-            </span>
-          </div>
+          <div style={{ color: colors.muted, fontSize: 13, marginTop: 4 }}>{wc.label}</div>
         </div>
       </div>
 
-      {/* Forecast */}
+      {/* Metrics */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 10,
+          gridTemplateColumns: "1fr 1fr",
+          gap: 8,
+          padding: "4px 18px 18px",
         }}
       >
-        {(data.forecast || []).map((day) => {
-          const dwc = WEATHER_CODES[day.weather_code] || { icon: "🌡" };
-          return (
-            <div
-              key={day.date}
-              style={{
-                backgroundColor: colors.deep,
-                border: `1px solid ${colors.borderSoft}`,
-                borderRadius: 12,
-                padding: "16px 12px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                textAlign: "center",
-                boxShadow: colors.shadowSoft,
-              }}
-            >
-              <div
-                style={{
-                  color: colors.muted,
-                  fontSize: 11,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  fontWeight: 600,
-                }}
-              >
-                {formatDay(day.date)}
-              </div>
-              <div style={{ fontSize: 34, lineHeight: 1 }}>{dwc.icon}</div>
-              <div
-                style={{
-                  color: colors.foam,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  fontFamily: fonts.body,
-                }}
-              >
-                {Math.round(day.temp_min)}° / {Math.round(day.temp_max)}°
-              </div>
-              <div
-                style={{
-                  color: colors.muted,
-                  fontSize: 11,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  width: "100%",
-                }}
-              >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                  💨 {Math.round(day.wind_max)}
-                </span>
-                <span style={{ color: colors.faint }}>·</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                  💧 {Math.round(day.rain_probability || 0)}%
-                </span>
-              </div>
-            </div>
-          );
-        })}
+        <Metric
+          icon="💨"
+          label="Vento"
+          value={
+            current.wind_speed != null
+              ? `${Math.round(current.wind_speed)} km/h ${windDir(current.wind_direction)}`
+              : "—"
+          }
+        />
+        <Metric
+          icon="🌬"
+          label="Raffiche"
+          value={current.wind_gusts != null ? `${Math.round(current.wind_gusts)} km/h` : "—"}
+        />
+        {showMarine && (
+          <>
+            <Metric
+              icon="🌊"
+              label="Onde"
+              value={
+                current.wave_height != null
+                  ? `${Number(current.wave_height).toFixed(1)} m`
+                  : "—"
+              }
+            />
+            <Metric
+              icon="🌀"
+              label="Marea"
+              value={
+                current.tide != null
+                  ? `${Number(current.tide).toFixed(2)} m`
+                  : current.sea_level != null
+                  ? `${Number(current.sea_level).toFixed(2)} m`
+                  : "—"
+              }
+            />
+          </>
+        )}
+        {!showMarine && current.humidity != null && (
+          <Metric icon="💧" label="Umidità" value={`${Math.round(current.humidity)}%`} />
+        )}
+      </div>
+
+      {/* Reasons */}
+      {tl.reasons && tl.reasons.length > 0 && (
+        <div
+          style={{
+            padding: "10px 18px 16px",
+            borderTop: `1px solid ${colors.borderSoft}`,
+            background: colors.panel,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              color: colors.muted,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              marginBottom: 6,
+              fontWeight: 600,
+            }}
+          >
+            Motivazioni
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: 18,
+              color: colors.foam,
+              fontSize: 13,
+              lineHeight: 1.5,
+            }}
+          >
+            {tl.reasons.map((r, i) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Metric({ icon, label, value }) {
+  return (
+    <div
+      style={{
+        background: colors.panel,
+        borderRadius: 10,
+        padding: "8px 10px",
+      }}
+    >
+      <div style={{ color: colors.muted, fontSize: 11, fontWeight: 600 }}>
+        {icon} {label}
+      </div>
+      <div style={{ color: colors.foam, fontSize: 14, fontWeight: 700, marginTop: 2 }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+export default function WeatherWidget() {
+  const [padova, setPadova] = useState(null);
+  const [laguna, setLaguna] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    Promise.allSettled([weatherApi.padova(), weatherApi.laguna()])
+      .then(([p, l]) => {
+        if (p.status === "fulfilled") setPadova(p.value.data);
+        if (l.status === "fulfilled") setLaguna(l.value.data);
+        if (p.status === "rejected" && l.status === "rejected") {
+          // fallback to legacy single endpoint
+          weatherApi
+            .current()
+            .then((r) => setPadova(r.data))
+            .catch(() => setError(true));
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <section style={{ maxWidth: 980, margin: "0 auto", padding: 20, textAlign: "center", color: colors.muted }}>
+        Caricamento condizioni meteo…
+      </section>
+    );
+  }
+  if (error || (!padova && !laguna)) return null;
+
+  return (
+    <section style={{ maxWidth: 980, margin: "0 auto", padding: "24px 20px" }}>
+      <h2
+        style={{
+          fontFamily: fonts.display,
+          color: colors.foam,
+          fontSize: 28,
+          margin: 0,
+          marginBottom: 16,
+          textAlign: "center",
+          fontWeight: 700,
+          letterSpacing: -0.5,
+        }}
+      >
+        Condizioni voga <span style={{ color: colors.lagoon }}>oggi</span>
+      </h2>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: 16,
+        }}
+      >
+        {padova && (
+          <SpotCard
+            title="🏞 Padova"
+            subtitle="Bacinetto di voga"
+            data={padova}
+            showMarine={false}
+          />
+        )}
+        {laguna && (
+          <SpotCard
+            title="🌊 Laguna di Venezia"
+            subtitle="Condizioni in laguna"
+            data={laguna}
+            showMarine={true}
+          />
+        )}
       </div>
     </section>
   );

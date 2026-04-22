@@ -131,7 +131,72 @@ export const settingsApi = {
 
 // ── Weather ───────────────────────────────────────
 export const weatherApi = {
-  current: () => api.get("/api/weather/current"),
+  padova: () => api.get("/api/weather/padova"),
+  laguna: () => api.get("/api/weather/laguna-venezia"),
+  current: () => api.get("/api/weather/current"), // back-compat
+};
+
+// ── Crews ─────────────────────────────────────────
+export const crewsApi = {
+  list: () => api.get("/api/crews/"),
+  get: (id) => api.get(`/api/crews/${id}`),
+  create: (data) => api.post("/api/crews/", data),
+  update: (id, data) => api.patch(`/api/crews/${id}`, data),
+  remove: (id) => api.delete(`/api/crews/${id}`),
+};
+
+// ── Gallery ───────────────────────────────────────
+export const galleryApi = {
+  listAlbums: (params = {}) => api.get("/api/gallery/albums/", { params }),
+  getAlbum: (id) => api.get(`/api/gallery/albums/${id}`),
+  createAlbum: (data) => api.post("/api/gallery/albums/", data),
+  updateAlbum: (id, data) => api.patch(`/api/gallery/albums/${id}`, data),
+  removeAlbum: (id) => api.delete(`/api/gallery/albums/${id}`),
+  uploadPhotos: (albumId, files) => {
+    const fd = new FormData();
+    files.forEach((f) => fd.append("files", f));
+    return api.post(`/api/gallery/albums/${albumId}/photos`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  removePhoto: (photoId) => api.delete(`/api/gallery/photos/${photoId}`),
+  setCover: (albumId, photoId) => api.post(`/api/gallery/albums/${albumId}/set-cover/${photoId}`),
+};
+
+// ── Email Templates ───────────────────────────────
+export const emailTemplatesApi = {
+  list: () => api.get("/api/email-templates/"),
+  get: (key) => api.get(`/api/email-templates/${key}`),
+  update: (key, data) => api.patch(`/api/email-templates/${key}`, data),
+  seed: () => api.post("/api/email-templates/seed"),
+  preview: (key, vars) => api.post(`/api/email-templates/${key}/preview`, { vars }),
+};
+
+// ── Invoices ──────────────────────────────────────
+export const invoicesApi = {
+  list: (params = {}) => api.get("/api/invoices/", { params }),
+  get: (id) => api.get(`/api/invoices/${id}`),
+  nextNumber: (year) => api.get("/api/invoices/next-number", { params: { year } }),
+  create: (data) => api.post("/api/invoices/", data),
+  fromFee: (feeId) => api.post(`/api/invoices/from-fee/${feeId}`),
+  downloadPdf: (id) => api.get(`/api/invoices/${id}/pdf`, { responseType: "blob" }),
+  remove: (id) => api.delete(`/api/invoices/${id}`),
+};
+
+// ── GDPR ──────────────────────────────────────────
+export const gdprApi = {
+  myData: () => api.get("/api/gdpr/my-data", { responseType: "blob" }),
+  requestDelete: (reason) => api.post("/api/gdpr/delete-request", { reason, confirm: true }),
+  listRequests: () => api.get("/api/gdpr/requests"),
+  processRequest: (id) => api.post(`/api/gdpr/requests/${id}/process`),
+};
+
+// ── Backups ───────────────────────────────────────
+export const backupsApi = {
+  list: () => api.get("/api/backups/"),
+  runNow: () => api.post("/api/backups/run-now"),
+  download: (filename) => api.get(`/api/backups/${filename}/download`, { responseType: "blob" }),
+  remove: (filename) => api.delete(`/api/backups/${filename}`),
 };
 
 // ── Contact ───────────────────────────────────────

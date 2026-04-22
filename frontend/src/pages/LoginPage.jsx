@@ -141,6 +141,10 @@ export default function LoginPage() {
           <a href="/" style={{ color: colors.lagoon, textDecoration: "none" }}>
             ← Torna alla homepage
           </a>
+          <span style={{ margin: "0 8px", color: colors.faint }}>·</span>
+          <a href="/privacy" style={{ color: colors.lagoon, textDecoration: "none" }}>
+            🛡 Privacy Policy
+          </a>
         </div>
       </div>
     </div>

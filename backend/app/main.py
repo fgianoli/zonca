@@ -5,16 +5,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import attendance, auth, boats, bookings, circulars, contact, dashboard, documents, events, exports, fees, finance, ical, maintenance, members, settings, users, weather
+from app.api import attendance, auth, backups, boats, bookings, circulars, contact, crews, dashboard, documents, email_templates, events, exports, fees, finance, gallery, gdpr, ical, invoices, maintenance, members, settings, users, weather
+from app.services.backup import backup_loop
 from app.services.reminders import reminder_loop
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Avvia lo scheduler promemoria certificati medici in background
-    task = asyncio.create_task(reminder_loop())
+    reminder_task = asyncio.create_task(reminder_loop())
+    # Avvia lo scheduler di backup automatico del DB
+    backup_task = asyncio.create_task(backup_loop())
     yield
-    task.cancel()
+    reminder_task.cancel()
+    backup_task.cancel()
 
 
 app = FastAPI(
@@ -49,6 +53,12 @@ app.include_router(events.router, prefix="/api")
 app.include_router(maintenance.router, prefix="/api")
 app.include_router(exports.router, prefix="/api")
 app.include_router(ical.router, prefix="/api")
+app.include_router(backups.router, prefix="/api")
+app.include_router(crews.router, prefix="/api")
+app.include_router(gallery.router, prefix="/api")
+app.include_router(email_templates.router, prefix="/api")
+app.include_router(invoices.router, prefix="/api")
+app.include_router(gdpr.router, prefix="/api")
 
 
 @app.get("/api/health")

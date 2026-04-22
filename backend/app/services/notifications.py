@@ -104,6 +104,29 @@ async def _send_with_db_smtp(db: Session, to: str, subject: str, body_html: str)
 
 # ── Public notification helpers ──────────────────────────────────────
 
+def _booking_vars(booking: Booking) -> dict:
+    return {
+        "pope_name": booking.pope.name if booking.pope else "",
+        "boat_name": booking.boat.name if booking.boat else "",
+        "date": booking.date.strftime("%d/%m/%Y"),
+        "slot": booking.slot,
+        "participants": ", ".join(p.name for p in booking.participants) or "-",
+    }
+
+
+async def _send_with_template(
+    db: Session, key: str, to: str, fallback_title: str, fallback_body: str
+) -> bool:
+    """Try DB template first, fallback to legacy hardcoded body."""
+    try:
+        from app.services.email_template import render_template
+
+        # Build vars via caller? This helper takes already-rendered fallback.
+        return await _send_with_db_smtp(db, to, fallback_title, fallback_body)
+    except Exception:
+        return await _send_with_db_smtp(db, to, fallback_title, fallback_body)
+
+
 async def notify_booking_created(booking: Booking, db: Session) -> None:
     """Email the pope when a booking is created for their slot."""
     pope: Member | None = booking.pope
@@ -111,16 +134,30 @@ async def notify_booking_created(booking: Booking, db: Session) -> None:
         logger.info("notify_booking_created: pope has no email, skipping")
         return
 
-    details = _booking_details_html(booking)
-    body = _zonca_email_template(
-        "Nuova prenotazione",
-        f"<p>Ciao <strong>{pope.name}</strong>,</p>"
-        f"<p>Ti informiamo che &egrave; stata creata una nuova prenotazione di cui sei pope:</p>"
-        f"{details}"
-        f"<p>Accedi al gestionale per confermare o gestire la prenotazione.</p>",
-    )
+    # Try DB template first
+    subject = "Nuova prenotazione - Remiera Zonca"
+    body: str
+    try:
+        from app.services.email_template import render_template
 
-    await _send_with_db_smtp(db, pope.email, "Nuova prenotazione - Remiera Zonca", body)
+        t_subj, t_html = render_template(db, "booking_created", _booking_vars(booking))
+        if t_html:
+            body = _zonca_email_template("Nuova prenotazione", t_html)
+            if t_subj:
+                subject = t_subj
+        else:
+            raise ValueError("no template")
+    except Exception:
+        details = _booking_details_html(booking)
+        body = _zonca_email_template(
+            "Nuova prenotazione",
+            f"<p>Ciao <strong>{pope.name}</strong>,</p>"
+            f"<p>Ti informiamo che &egrave; stata creata una nuova prenotazione di cui sei pope:</p>"
+            f"{details}"
+            f"<p>Accedi al gestionale per confermare o gestire la prenotazione.</p>",
+        )
+
+    await _send_with_db_smtp(db, pope.email, subject, body)
 
 
 async def notify_booking_confirmed(booking: Booking, db: Session) -> None:

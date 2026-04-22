@@ -23,6 +23,14 @@ import UtentiPage from "./pages/UtentiPage";
 import ProfiloPage from "./pages/ProfiloPage";
 import EventiPage from "./pages/EventiPage";
 import MappaPage from "./pages/MappaPage";
+import EquipaggiPage from "./pages/EquipaggiPage";
+import GalleryPage from "./pages/GalleryPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import FatturePage from "./pages/FatturePage";
+import TemplateEmailPage from "./pages/TemplateEmailPage";
+import BackupsPage from "./pages/BackupsPage";
+import GdprRequestsPage from "./pages/GdprRequestsPage";
+import CookieBanner from "./components/CookieBanner";
 
 import { colors, fonts } from "./styles/theme";
 
@@ -126,6 +134,27 @@ function HomePage() {
       <WeatherWidget />
       <DownloadAdesione />
       <ContactForm />
+      <footer
+        style={{
+          textAlign: "center",
+          padding: "28px 20px 40px",
+          color: colors.muted,
+          fontSize: 12,
+          borderTop: `1px solid ${colors.borderSoft}`,
+          marginTop: 20,
+        }}
+      >
+        <a
+          href="/privacy"
+          style={{ color: colors.lagoon, textDecoration: "none", fontWeight: 600 }}
+        >
+          🛡 Privacy Policy
+        </a>
+        <span style={{ margin: "0 10px", color: colors.faint }}>·</span>
+        <span>
+          © {new Date().getFullYear()} Scuola Padovana di Voga alla Veneta "Vittorio Zonca" ASD
+        </span>
+      </footer>
     </div>
   );
 }
@@ -139,6 +168,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/mappa" element={<MappaPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
 
           {/* Protected - all authenticated users */}
           <Route
@@ -153,6 +183,8 @@ export default function App() {
             <Route path="/soci" element={<SociPage />} />
             <Route path="/prenotazioni" element={<PrenotazioniPage />} />
             <Route path="/eventi" element={<EventiPage />} />
+            <Route path="/equipaggi" element={<EquipaggiPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/profilo" element={<ProfiloPage />} />
           </Route>
 
@@ -180,10 +212,15 @@ export default function App() {
             <Route path="/circolari" element={<CircolariPage />} />
             <Route path="/utenti" element={<UtentiPage />} />
             <Route path="/impostazioni" element={<ImpostazioniPage />} />
+            <Route path="/admin/fatture" element={<FatturePage />} />
+            <Route path="/admin/email-templates" element={<TemplateEmailPage />} />
+            <Route path="/admin/backup" element={<BackupsPage />} />
+            <Route path="/admin/gdpr" element={<GdprRequestsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        <CookieBanner />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ import {
   documentsApi,
   feesApi,
   exportsApi,
+  invoicesApi,
   downloadBlob,
 } from "../api/services";
 import Modal from "../components/Modal";
@@ -1006,6 +1007,44 @@ function QuoteTab({ member, isAdmin, onMemberReload }) {
                       >
                         {f.paid ? "Non pag." : "✓ Pagata"}
                       </button>
+                      {f.paid && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await invoicesApi.fromFee(f.id);
+                              const inv = res.data;
+                              showMsg(
+                                `Fattura ${inv.number || "creata"} generata`,
+                                "ok"
+                              );
+                              if (inv?.id) {
+                                try {
+                                  const pdfRes = await invoicesApi.downloadPdf(inv.id);
+                                  downloadBlob(
+                                    pdfRes,
+                                    `fattura_${inv.number || inv.id}.pdf`
+                                  );
+                                } catch {
+                                  // ignore download err
+                                }
+                              }
+                            } catch (e) {
+                              showMsg(
+                                e.response?.data?.detail || "Errore generazione fattura",
+                                "err"
+                              );
+                            }
+                          }}
+                          title="Genera fattura"
+                          style={{
+                            ...S.btnSmall,
+                            background: `${colors.lagoon}22`,
+                            color: colors.lagoon,
+                          }}
+                        >
+                          🧾 Fattura
+                        </button>
+                      )}
                       <button onClick={() => remove(f)} style={{ ...S.btnSmall, ...S.btnRed }}>
                         ✕
                       </button>

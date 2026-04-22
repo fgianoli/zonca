@@ -152,11 +152,17 @@ export default function Layout() {
         <NavLink to="/prenotazioni" style={navStyle}>
           📋 Prenotazioni
         </NavLink>
+        <NavLink to="/equipaggi" style={navStyle}>
+          👥 Equipaggi
+        </NavLink>
         <NavLink to="/eventi" style={navStyle}>
           🎉 Eventi
         </NavLink>
         <NavLink to="/mappa" style={navStyle}>
           🗺 Mappa
+        </NavLink>
+        <NavLink to="/gallery" style={navStyle}>
+          📸 Gallery
         </NavLink>
         <NavLink to="/profilo" style={navStyle}>
           👤 Profilo
@@ -176,6 +182,18 @@ export default function Layout() {
             </NavLink>
             <NavLink to="/circolari" style={navStyle}>
               📣 Circolari
+            </NavLink>
+            <NavLink to="/admin/fatture" style={navStyle}>
+              🧾 Fatture
+            </NavLink>
+            <NavLink to="/admin/email-templates" style={navStyle}>
+              ✉️ Template Email
+            </NavLink>
+            <NavLink to="/admin/backup" style={navStyle}>
+              💾 Backup
+            </NavLink>
+            <NavLink to="/admin/gdpr" style={navStyle}>
+              🛡 GDPR
             </NavLink>
             <NavLink to="/utenti" style={navStyle}>
               🔐 Utenti
