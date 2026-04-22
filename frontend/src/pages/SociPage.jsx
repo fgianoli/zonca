@@ -10,6 +10,7 @@ import {
 } from "../api/services";
 import Modal from "../components/Modal";
 import { colors, fonts, S, RUOLI, formatDate, formatEuro } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const EMPTY_MEMBER = {
   name: "",
@@ -62,6 +63,7 @@ function RuoloBadge({ ruolo, small }) {
 export default function SociPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isMobile = useIsMobile();
 
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,14 +122,23 @@ export default function SociPage() {
   };
 
   return (
-    <div style={S.container}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20 }}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "stretch" : "flex-end",
+          marginBottom: 20,
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 12 : 0,
+        }}
+      >
         <div>
-          <h1 style={S.title}>Soci & Ospiti</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Soci & Ospiti</h1>
           <div style={S.subtitle}>{members.length} iscritti • gestione anagrafica, certificati, quote</div>
         </div>
         {isAdmin && (
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexDirection: isMobile ? "column" : "row" }}>
             <button
               onClick={async () => {
                 try {
@@ -137,13 +148,13 @@ export default function SociPage() {
                   alert(e.response?.data?.detail || "Errore export");
                 }
               }}
-              style={{ ...S.btn, ...S.btnGhost }}
+              style={{ ...S.btn, ...S.btnGhost, width: isMobile ? "100%" : "auto" }}
             >
               📥 Esporta CSV
             </button>
             <button
               onClick={() => setCreating(true)}
-              style={{ ...S.btn, ...S.btnGold, color: colors.deep }}
+              style={{ ...S.btn, ...S.btnGold, color: colors.deep, width: isMobile ? "100%" : "auto" }}
             >
               + Nuovo socio
             </button>
@@ -152,15 +163,36 @@ export default function SociPage() {
       </div>
 
       {/* stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 20 }}>
-        <StatCard label="Certificati in scadenza" value={stats.expiring} color={colors.orange} icon="⚠" />
-        <StatCard label="Certificati scaduti/mancanti" value={stats.expired} color={colors.red} icon="✗" />
-        <StatCard label={`Quote ${currentYear} pagate`} value={stats.paid} color={colors.green} icon="✓" />
-        <StatCard label={`Quote ${currentYear} da pagare`} value={stats.unpaid} color={colors.gold} icon="€" />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: isMobile ? 8 : 12,
+          marginBottom: 20,
+        }}
+      >
+        <StatCard label="Cert. in scadenza" value={stats.expiring} color={colors.orange} icon="⚠" isMobile={isMobile} />
+        <StatCard label="Cert. scaduti/mancanti" value={stats.expired} color={colors.red} icon="✗" isMobile={isMobile} />
+        <StatCard label={`Quote ${currentYear} pagate`} value={stats.paid} color={colors.green} icon="✓" isMobile={isMobile} />
+        <StatCard label={`Quote ${currentYear} da pagare`} value={stats.unpaid} color={colors.gold} icon="€" isMobile={isMobile} />
       </div>
 
       {/* filter tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+      <div
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: 6,
+                marginBottom: 16,
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                paddingBottom: 4,
+                WebkitOverflowScrolling: "touch",
+              }
+            : { display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }
+        }
+      >
         {["tutti", ...Object.keys(RUOLI)].map((f) => {
           const active = filter === f;
           const label = f === "tutti" ? "Tutti" : `${RUOLI[f].icon} ${RUOLI[f].label}`;
@@ -174,6 +206,7 @@ export default function SociPage() {
                 border: `1px solid ${active ? colors.lagoon : colors.muted}44`,
                 color: active ? "#fff" : colors.muted,
                 padding: "6px 14px",
+                flexShrink: 0,
               }}
             >
               {label} <span style={{ opacity: 0.7 }}>({counts[f] || 0})</span>
@@ -197,6 +230,7 @@ export default function SociPage() {
               key={m.id}
               member={m}
               isAdmin={isAdmin}
+              isMobile={isMobile}
               onDetail={() => setDetail(m)}
               onEdit={() => setEditing(m)}
               onDelete={() => handleDelete(m)}
@@ -247,28 +281,38 @@ export default function SociPage() {
   );
 }
 
-function StatCard({ label, value, color, icon }) {
+function StatCard({ label, value, color, icon, isMobile }) {
   return (
-    <div style={{ ...S.card, borderColor: `${color}66`, display: "flex", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        ...S.card,
+        borderColor: `${color}66`,
+        display: "flex",
+        alignItems: "center",
+        gap: isMobile ? 8 : 12,
+        padding: isMobile ? 12 : 20,
+      }}
+    >
       <div
         style={{
-          width: 44,
-          height: 44,
+          width: isMobile ? 36 : 44,
+          height: isMobile ? 36 : 44,
           borderRadius: "50%",
           backgroundColor: `${color}22`,
           color: color,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 20,
+          fontSize: isMobile ? 16 : 20,
           fontWeight: 700,
+          flexShrink: 0,
         }}
       >
         {icon}
       </div>
-      <div>
-        <div style={{ color: colors.foam, fontSize: 24, fontWeight: 700, fontFamily: fonts.display }}>{value}</div>
-        <div style={{ color: colors.muted, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ color: colors.foam, fontSize: isMobile ? 20 : 24, fontWeight: 700, fontFamily: fonts.display }}>{value}</div>
+        <div style={{ color: colors.muted, fontSize: isMobile ? 10 : 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
           {label}
         </div>
       </div>
@@ -276,7 +320,7 @@ function StatCard({ label, value, color, icon }) {
   );
 }
 
-function MemberRow({ member, isAdmin, onDetail, onEdit, onDelete }) {
+function MemberRow({ member, isAdmin, isMobile, onDetail, onEdit, onDelete }) {
   const r = RUOLI[member.ruolo] || RUOLI.ospite;
   const cs = certStatus(member.medical_cert_expiry);
   const feeOk = !!member.fee_paid_current_year;
@@ -286,39 +330,52 @@ function MemberRow({ member, isAdmin, onDetail, onEdit, onDelete }) {
       style={{
         ...S.card,
         display: "flex",
-        alignItems: "center",
-        gap: 14,
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "stretch" : "center",
+        gap: isMobile ? 10 : 14,
+        padding: isMobile ? 14 : 20,
         opacity: member.is_active === false ? 0.5 : 1,
       }}
     >
+      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+        <div
+          style={{
+            width: isMobile ? 40 : 48,
+            height: isMobile ? 40 : 48,
+            borderRadius: "50%",
+            backgroundColor: `${r.color}33`,
+            border: `2px solid ${r.color}88`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: isMobile ? 18 : 22,
+            flexShrink: 0,
+          }}
+        >
+          {r.icon}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ color: colors.foam, fontWeight: 700, fontSize: isMobile ? 14 : 15 }}>{member.name}</span>
+            <RuoloBadge ruolo={member.ruolo} small />
+            {member.tessera && <span style={{ color: colors.muted, fontSize: 11 }}>#{member.tessera}</span>}
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4, color: colors.muted, fontSize: 11 }}>
+            {member.email && <span>✉ {member.email}</span>}
+            {member.phone && <span>☎ {member.phone}</span>}
+          </div>
+        </div>
+      </div>
       <div
         style={{
-          width: 48,
-          height: 48,
-          borderRadius: "50%",
-          backgroundColor: `${r.color}33`,
-          border: `2px solid ${r.color}88`,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 22,
+          flexDirection: isMobile ? "row" : "column",
+          alignItems: isMobile ? "flex-start" : "flex-end",
+          flexWrap: "wrap",
+          gap: 4,
           flexShrink: 0,
         }}
       >
-        {r.icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ color: colors.foam, fontWeight: 700, fontSize: 15 }}>{member.name}</span>
-          <RuoloBadge ruolo={member.ruolo} small />
-          {member.tessera && <span style={{ color: colors.muted, fontSize: 11 }}>#{member.tessera}</span>}
-        </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4, color: colors.muted, fontSize: 11 }}>
-          {member.email && <span>✉ {member.email}</span>}
-          {member.phone && <span>☎ {member.phone}</span>}
-        </div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
         <span style={{ ...S.badge, backgroundColor: `${cs.color}22`, color: cs.color, border: `1px solid ${cs.color}55` }}>
           {cs.icon} Cert. {cs.label}
           {member.medical_cert_expiry && ` • ${formatDate(member.medical_cert_expiry)}`}
@@ -334,13 +391,13 @@ function MemberRow({ member, isAdmin, onDetail, onEdit, onDelete }) {
           Quota {currentYear}: {feeOk ? "pagata" : "non pagata"}
         </span>
       </div>
-      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-        <button onClick={onDetail} style={{ ...S.btnSmall, backgroundColor: colors.lagoon, color: "#fff" }}>
+      <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap" }}>
+        <button onClick={onDetail} style={{ ...S.btnSmall, backgroundColor: colors.lagoon, color: "#fff", flex: isMobile ? 1 : "0 0 auto" }}>
           Dettaglio
         </button>
         {isAdmin && (
           <>
-            <button onClick={onEdit} style={{ ...S.btnSmall, backgroundColor: `${colors.lagoon}33`, color: colors.foam }}>
+            <button onClick={onEdit} style={{ ...S.btnSmall, backgroundColor: `${colors.lagoon}33`, color: colors.foam, flex: isMobile ? 1 : "0 0 auto" }}>
               Modifica
             </button>
             <button onClick={onDelete} style={{ ...S.btnSmall, backgroundColor: `${colors.red}33`, color: colors.red }}>
@@ -440,6 +497,7 @@ function MemberFormModal({ title, initial, onClose, onSave }) {
 function DetailModal({ member, isAdmin, currentUser, onClose, onMemberChange }) {
   const [tab, setTab] = useState("anagrafica");
   const canEditThis = isAdmin || currentUser?.member_id === member.id;
+  const isMobile = useIsMobile();
 
   const tabs = [
     { id: "anagrafica", label: "Anagrafica", icon: "👤" },
@@ -449,9 +507,19 @@ function DetailModal({ member, isAdmin, currentUser, onClose, onMemberChange }) 
   ];
 
   return (
-    <div style={S.modalOverlay} onClick={onClose}>
+    <div
+      style={{ ...S.modalOverlay, padding: isMobile ? 10 : 20, alignItems: isMobile ? "flex-start" : "center" }}
+      onClick={onClose}
+    >
       <div
-        style={{ ...S.modal, maxWidth: 780 }}
+        style={{
+          ...S.modal,
+          maxWidth: isMobile ? "100%" : 780,
+          padding: isMobile ? 18 : 32,
+          borderRadius: isMobile ? 12 : 18,
+          marginTop: isMobile ? 8 : 0,
+          maxHeight: isMobile ? "calc(100vh - 20px)" : "90vh",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -471,7 +539,17 @@ function DetailModal({ member, isAdmin, currentUser, onClose, onMemberChange }) 
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 4, borderBottom: `1px solid ${colors.lagoon}33`, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            borderBottom: `1px solid ${colors.lagoon}33`,
+            marginBottom: 20,
+            overflowX: isMobile ? "auto" : "visible",
+            whiteSpace: isMobile ? "nowrap" : "normal",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
           {tabs.map((t) => {
             const active = tab === t.id;
             return (

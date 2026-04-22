@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { crewsApi, membersApi } from "../api/services";
 import Modal from "../components/Modal";
 import { S, colors, fonts, SLOTS, RUOLI } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const EMPTY = {
   name: "",
@@ -34,6 +35,7 @@ function Banner({ kind = "ok", children }) {
 export default function EquipaggiPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isMobile = useIsMobile();
 
   const [crews, setCrews] = useState([]);
   const [members, setMembers] = useState([]);
@@ -78,19 +80,20 @@ export default function EquipaggiPage() {
   };
 
   return (
-    <div style={S.container}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-end",
+          alignItems: isMobile ? "stretch" : "flex-end",
           marginBottom: 20,
           gap: 10,
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
         }}
       >
         <div>
-          <h1 style={S.title}>Equipaggi</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Equipaggi</h1>
           <div style={S.subtitle}>
             {crews.length} equipaggi • gruppi fissi con pope e vogatori
           </div>
@@ -98,7 +101,7 @@ export default function EquipaggiPage() {
         {isAdmin && (
           <button
             onClick={() => setCreating(true)}
-            style={{ ...S.btn, ...S.btnGold, color: colors.deep }}
+            style={{ ...S.btn, ...S.btnGold, color: colors.deep, width: isMobile ? "100%" : "auto" }}
           >
             + Nuovo equipaggio
           </button>
@@ -117,7 +120,7 @@ export default function EquipaggiPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))",
             gap: 14,
           }}
         >

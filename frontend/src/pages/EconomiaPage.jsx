@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { financeApi, membersApi, exportsApi, downloadBlob } from "../api/services";
 import { S, colors, fonts, formatDate, formatEuro, todayStr } from "../styles/theme";
 import Modal from "../components/Modal";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const CATEGORIES = {
   quota_sociale: "Quota sociale",
@@ -26,6 +27,7 @@ const emptyForm = {
 };
 
 export default function EconomiaPage() {
+  const isMobile = useIsMobile();
   const [records, setRecords] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -157,15 +159,23 @@ export default function EconomiaPage() {
   );
 
   return (
-    <div style={S.container}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "stretch" : "flex-end",
+          flexDirection: isMobile ? "column" : "row",
+          gap: 12,
+        }}
+      >
         <div>
-          <h1 style={S.title}>Economia</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Economia</h1>
           <p style={S.subtitle}>Registrazioni entrate e uscite</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexDirection: isMobile ? "column" : "row" }}>
           <button
-            style={{ ...S.btn, ...S.btnGhost }}
+            style={{ ...S.btn, ...S.btnGhost, width: isMobile ? "100%" : "auto" }}
             onClick={async () => {
               try {
                 const from = filters.date_from || "";
@@ -180,14 +190,14 @@ export default function EconomiaPage() {
           >
             📥 Esporta CSV
           </button>
-          <button style={{ ...S.btn, ...S.btnGold }} onClick={openNew}>
+          <button style={{ ...S.btn, ...S.btnGold, width: isMobile ? "100%" : "auto" }} onClick={openNew}>
             + Nuova registrazione
           </button>
         </div>
       </div>
 
       {/* Summary */}
-      <div style={{ display: "flex", gap: 16, margin: "24px 0", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 8 : 16, margin: "24px 0", flexWrap: "wrap" }}>
         <div style={{ ...S.card, flex: 1, minWidth: 180, borderLeft: `4px solid ${colors.green}` }}>
           <div style={{ color: colors.muted, fontSize: 12, textTransform: "uppercase" }}>
             Entrate totali
@@ -259,14 +269,65 @@ export default function EconomiaPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div style={S.card}>
+      {/* Table / Card stack */}
+      <div style={{ ...S.card, padding: isMobile ? 12 : 20 }}>
         {loading ? (
           <p style={{ color: colors.muted }}>Caricamento...</p>
         ) : error ? (
           <p style={{ color: colors.red }}>{error}</p>
         ) : sorted.length === 0 ? (
           <p style={{ color: colors.muted }}>Nessuna registrazione trovata.</p>
+        ) : isMobile ? (
+          <div style={{ display: "grid", gap: 10 }}>
+            {sorted.map((r) => (
+              <div
+                key={r.id}
+                style={{
+                  border: `1px solid ${colors.borderSoft}`,
+                  borderLeft: `4px solid ${r.type === "entrata" ? colors.green : colors.red}`,
+                  borderRadius: 10,
+                  padding: 12,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      {badge(r.type)}
+                      <span style={{ color: colors.muted, fontSize: 12 }}>{formatDate(r.date)}</span>
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: fonts.display,
+                        fontSize: 20,
+                        fontWeight: 700,
+                        color: r.type === "entrata" ? colors.green : colors.red,
+                        marginTop: 4,
+                      }}
+                    >
+                      {formatEuro(r.amount)}
+                    </div>
+                    <div style={{ color: colors.foam, fontSize: 13, marginTop: 2 }}>
+                      {CATEGORIES[r.category] || r.category}
+                    </div>
+                    {r.description && (
+                      <div style={{ color: colors.muted, fontSize: 12, marginTop: 4 }}>{r.description}</div>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+                  <button
+                    style={{ ...S.btnSmall, backgroundColor: colors.lagoon, color: "#fff", flex: 1 }}
+                    onClick={() => openEdit(r)}
+                  >
+                    Modifica
+                  </button>
+                  <button style={{ ...S.btnSmall, ...S.btnRed, flex: 1 }} onClick={() => del(r)}>
+                    Elimina
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
@@ -337,7 +398,7 @@ export default function EconomiaPage() {
           <h3 style={{ fontFamily: fonts.display, color: colors.gold, fontSize: 18, margin: "0 0 12px" }}>
             Riepilogo per categoria
           </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
             {Object.entries(totals.byCategory).map(([key, val]) => {
               const [type, cat] = key.split(":");
               return (

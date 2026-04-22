@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { weatherApi } from "../api/services";
 import { colors, fonts } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const WEATHER_CODES = {
   0: { icon: "☀️", label: "Sereno" },
@@ -498,6 +499,7 @@ function TideMetric({ current }) {
 }
 
 export default function WeatherWidget() {
+  const isMobile = useIsMobile();
   const [padova, setPadova] = useState(null);
   const [laguna, setLaguna] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -529,14 +531,20 @@ export default function WeatherWidget() {
   if (error || (!padova && !laguna)) return null;
 
   return (
-    <section style={{ maxWidth: 980, margin: "0 auto", padding: "24px 20px" }}>
+    <section
+      style={{
+        maxWidth: 980,
+        margin: "0 auto",
+        padding: isMobile ? "16px 12px" : "24px 20px",
+      }}
+    >
       <h2
         style={{
           fontFamily: fonts.display,
           color: colors.foam,
-          fontSize: 28,
+          fontSize: isMobile ? 22 : 28,
           margin: 0,
-          marginBottom: 16,
+          marginBottom: 14,
           textAlign: "center",
           fontWeight: 700,
           letterSpacing: -0.5,
@@ -548,8 +556,8 @@ export default function WeatherWidget() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: 16,
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: isMobile ? 12 : 16,
         }}
       >
         {padova && (

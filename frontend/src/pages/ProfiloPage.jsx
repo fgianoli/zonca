@@ -11,6 +11,7 @@ import {
 } from "../api/services";
 import { S, colors, fonts, RUOLI, formatDate, formatEuro, TIPI_BARCA } from "../styles/theme";
 import { ChangePasswordForm } from "../components/ChangePasswordModal";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const DOC_TYPES = [
   { value: "privacy", label: "Privacy" },
@@ -63,23 +64,37 @@ function Banner({ kind = "ok", children }) {
 export default function ProfiloPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState("info");
+  const isMobile = useIsMobile();
 
   return (
-    <div style={S.container}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
       <div style={{ marginBottom: 18 }}>
-        <h1 style={S.title}>Il mio profilo</h1>
+        <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Il mio profilo</h1>
         <div style={S.subtitle}>{user?.email}</div>
       </div>
 
       {/* Tabs */}
       <div
-        style={{
-          display: "flex",
-          gap: 4,
-          borderBottom: `1px solid ${colors.border}`,
-          marginBottom: 20,
-          flexWrap: "wrap",
-        }}
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: 4,
+                borderBottom: `1px solid ${colors.border}`,
+                marginBottom: 20,
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                paddingBottom: 4,
+                WebkitOverflowScrolling: "touch",
+              }
+            : {
+                display: "flex",
+                gap: 4,
+                borderBottom: `1px solid ${colors.border}`,
+                marginBottom: 20,
+                flexWrap: "wrap",
+              }
+        }
       >
         {TABS.map((t) => {
           const active = tab === t.id;
@@ -97,6 +112,7 @@ export default function ProfiloPage() {
                 padding: "10px 14px",
                 fontSize: 13,
                 boxShadow: active ? colors.shadowLagoon : "none",
+                flexShrink: 0,
               }}
             >
               {t.icon} {t.label}
@@ -313,6 +329,7 @@ function InfoTab({ user }) {
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const isMobile = useIsMobile();
 
   const load = async () => {
     if (!user?.member_id) {
@@ -347,7 +364,17 @@ function InfoTab({ user }) {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <div style={{ ...S.cardElevated, display: "flex", gap: 18, alignItems: "center" }}>
+      <div
+        style={{
+          ...S.cardElevated,
+          display: "flex",
+          gap: isMobile ? 12 : 18,
+          alignItems: "center",
+          flexDirection: isMobile ? "column" : "row",
+          textAlign: isMobile ? "center" : "left",
+          padding: isMobile ? 18 : 24,
+        }}
+      >
         <div
           style={{
             width: 72,
@@ -368,7 +395,7 @@ function InfoTab({ user }) {
           <div style={{ fontFamily: fonts.display, fontSize: 24, fontWeight: 700, color: colors.foam }}>
             {member.name}
           </div>
-          <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: isMobile ? "center" : "flex-start" }}>
             <span
               style={{
                 ...S.badge,
@@ -385,14 +412,14 @@ function InfoTab({ user }) {
               </span>
             )}
           </div>
-          <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", color: colors.muted, fontSize: 13 }}>
+          <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", color: colors.muted, fontSize: 13, justifyContent: isMobile ? "center" : "flex-start" }}>
             {member.email && <span>✉ {member.email}</span>}
             {member.phone && <span>☎ {member.phone}</span>}
           </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
         <div style={{ ...S.card, borderLeft: `4px solid ${cs.color}` }}>
           <div style={{ color: colors.muted, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, fontWeight: 600 }}>
             Certificato medico

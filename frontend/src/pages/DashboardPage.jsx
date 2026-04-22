@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { dashboardApi } from "../api/services";
 import { S, colors, fonts, RUOLI, formatEuro } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let mounted = true;
@@ -21,7 +23,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={S.container}>
+      <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
         <p style={{ color: colors.muted }}>Caricamento...</p>
       </div>
     );
@@ -29,18 +31,18 @@ export default function DashboardPage() {
 
   if (error || !stats) {
     return (
-      <div style={S.container}>
+      <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
         <p style={{ color: colors.red }}>{error || "Nessun dato disponibile"}</p>
       </div>
     );
   }
 
   const bigCard = (label, value, color) => (
-    <div style={{ ...S.card, flex: 1, minWidth: 180 }}>
+    <div style={{ ...S.card, flex: 1, minWidth: isMobile ? 140 : 180, padding: isMobile ? 14 : 20 }}>
       <div
         style={{
           color: colors.muted,
-          fontSize: 12,
+          fontSize: isMobile ? 10 : 12,
           textTransform: "uppercase",
           letterSpacing: 1,
           marginBottom: 8,
@@ -51,7 +53,7 @@ export default function DashboardPage() {
       <div
         style={{
           fontFamily: fonts.display,
-          fontSize: 38,
+          fontSize: isMobile ? 28 : 38,
           color: color || colors.foam,
           lineHeight: 1,
         }}
@@ -80,12 +82,12 @@ export default function DashboardPage() {
   const f = stats.finance || {};
 
   return (
-    <div style={S.container}>
-      <h1 style={S.title}>Dashboard</h1>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
+      <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Dashboard</h1>
       <p style={S.subtitle}>Panoramica generale del gestionale</p>
 
       {section("Soci")}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 10 : 16, flexWrap: "wrap" }}>
         {bigCard("Soci attivi", m.total_active ?? 0, colors.gold)}
         {bigCard(
           "Cert. in scadenza (30gg)",
@@ -105,24 +107,25 @@ export default function DashboardPage() {
       </div>
 
       {section("Soci per ruolo")}
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap" }}>
         {Object.entries(RUOLI).map(([key, info]) => (
           <div
             key={key}
             style={{
               ...S.card,
               flex: 1,
-              minWidth: 140,
+              minWidth: isMobile ? 120 : 140,
+              padding: isMobile ? 14 : 20,
               borderLeft: `4px solid ${info.color}`,
             }}
           >
-            <div style={{ color: colors.muted, fontSize: 12, textTransform: "uppercase" }}>
+            <div style={{ color: colors.muted, fontSize: isMobile ? 10 : 12, textTransform: "uppercase" }}>
               {info.icon} {info.label}
             </div>
             <div
               style={{
                 fontFamily: fonts.display,
-                fontSize: 32,
+                fontSize: isMobile ? 24 : 32,
                 color: info.color,
                 marginTop: 6,
               }}
@@ -134,7 +137,7 @@ export default function DashboardPage() {
       </div>
 
       {section("Flotta")}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 10 : 16, flexWrap: "wrap" }}>
         <div style={{ ...S.card, flex: 1, minWidth: 160 }}>
           <div style={{ color: colors.muted, fontSize: 12, textTransform: "uppercase" }}>
             Totale barche
@@ -170,7 +173,7 @@ export default function DashboardPage() {
       </div>
 
       {section("Prenotazioni")}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 10 : 16, flexWrap: "wrap" }}>
         {bigCard("Questo mese", bk.this_month ?? 0, colors.lagoon)}
         {bigCard(
           "In attesa di conferma",
@@ -180,7 +183,7 @@ export default function DashboardPage() {
       </div>
 
       {section("Bilancio anno corrente")}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 10 : 16, flexWrap: "wrap" }}>
         <div style={{ ...S.card, flex: 1, minWidth: 200, borderLeft: `4px solid ${colors.green}` }}>
           <div style={{ color: colors.muted, fontSize: 12, textTransform: "uppercase" }}>
             Entrate

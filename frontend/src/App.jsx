@@ -33,8 +33,10 @@ import GdprRequestsPage from "./pages/GdprRequestsPage";
 import CookieBanner from "./components/CookieBanner";
 
 import { colors, fonts } from "./styles/theme";
+import { useIsMobile } from "./hooks/useMediaQuery";
 
 function HomePage() {
+  const isMobile = useIsMobile();
   return (
     <div
       style={{
@@ -47,31 +49,35 @@ function HomePage() {
       <header
         style={{
           textAlign: "center",
-          padding: "64px 20px 56px",
+          padding: isMobile ? "20px 16px 32px" : "64px 20px 56px",
           background: colors.gradHero,
           position: "relative",
           borderBottom: `1px solid ${colors.borderSoft}`,
         }}
       >
+        {/* Su mobile i bottoni sono in una barra top-right flottante */}
         <div
           style={{
-            position: "absolute",
-            top: 24,
-            right: 24,
+            position: isMobile ? "static" : "absolute",
+            top: isMobile ? "auto" : 24,
+            right: isMobile ? "auto" : 24,
             display: "flex",
-            gap: 10,
+            gap: isMobile ? 8 : 10,
+            justifyContent: "center",
+            marginBottom: isMobile ? 20 : 0,
+            flexWrap: "wrap",
           }}
         >
           <a
             href="/mappa"
             style={{
-              padding: "10px 18px",
+              padding: isMobile ? "8px 14px" : "10px 18px",
               background: "#ffffffcc",
               backdropFilter: "blur(8px)",
               color: colors.foam,
               borderRadius: 10,
               textDecoration: "none",
-              fontSize: 13,
+              fontSize: isMobile ? 12 : 13,
               fontWeight: 600,
               border: `1px solid ${colors.border}`,
             }}
@@ -81,12 +87,12 @@ function HomePage() {
           <a
             href="/login"
             style={{
-              padding: "10px 20px",
+              padding: isMobile ? "8px 14px" : "10px 20px",
               background: colors.gradLagoon,
               color: "#fff",
               borderRadius: 10,
               textDecoration: "none",
-              fontSize: 13,
+              fontSize: isMobile ? 12 : 13,
               fontWeight: 600,
               boxShadow: colors.shadowLagoon,
             }}
@@ -98,7 +104,7 @@ function HomePage() {
           src="/logo_zonca.png"
           alt="Logo Remiera Zonca"
           style={{
-            height: 140,
+            height: isMobile ? 100 : 140,
             width: "auto",
             objectFit: "contain",
             marginBottom: 16,
@@ -109,10 +115,11 @@ function HomePage() {
           style={{
             fontFamily: fonts.display,
             color: colors.foam,
-            fontSize: 48,
+            fontSize: isMobile ? 32 : 48,
             margin: 0,
             fontWeight: 700,
             letterSpacing: -1,
+            lineHeight: 1.1,
           }}
         >
           Remiera <span style={{ color: colors.lagoon }}>Zonca</span>
@@ -120,11 +127,12 @@ function HomePage() {
         <p
           style={{
             color: colors.muted,
-            fontSize: 17,
+            fontSize: isMobile ? 14 : 17,
             marginTop: 10,
             maxWidth: 520,
             marginLeft: "auto",
             marginRight: "auto",
+            padding: isMobile ? "0 8px" : 0,
           }}
         >
           Scuola Padovana di Voga alla Veneta "Vittorio Zonca"
@@ -137,7 +145,7 @@ function HomePage() {
       <footer
         style={{
           textAlign: "center",
-          padding: "28px 20px 40px",
+          padding: isMobile ? "20px 16px 32px" : "28px 20px 40px",
           color: colors.muted,
           fontSize: 12,
           borderTop: `1px solid ${colors.borderSoft}`,
@@ -150,10 +158,9 @@ function HomePage() {
         >
           🛡 Privacy Policy
         </a>
-        <span style={{ margin: "0 10px", color: colors.faint }}>·</span>
-        <span>
+        <div style={{ marginTop: 6 }}>
           © {new Date().getFullYear()} Scuola Padovana di Voga alla Veneta "Vittorio Zonca" ASD
-        </span>
+        </div>
       </footer>
     </div>
   );

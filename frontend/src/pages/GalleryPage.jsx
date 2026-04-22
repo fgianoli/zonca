@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { galleryApi } from "../api/services";
 import Modal from "../components/Modal";
 import { S, colors, fonts, formatDate } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 function Banner({ kind = "ok", children }) {
   const color = kind === "ok" ? colors.green : colors.red;
@@ -26,6 +27,7 @@ function Banner({ kind = "ok", children }) {
 export default function GalleryPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isMobile = useIsMobile();
 
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,24 +64,25 @@ export default function GalleryPage() {
   };
 
   return (
-    <div style={S.container}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-end",
+          alignItems: isMobile ? "stretch" : "flex-end",
           marginBottom: 20,
           gap: 10,
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
         }}
       >
         <div>
-          <h1 style={S.title}>Gallery</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Gallery</h1>
           <div style={S.subtitle}>{albums.length} album • foto delle uscite ed eventi</div>
         </div>
         <button
           onClick={() => setCreating(true)}
-          style={{ ...S.btn, ...S.btnGold, color: colors.deep }}
+          style={{ ...S.btn, ...S.btnGold, color: colors.deep, width: isMobile ? "100%" : "auto" }}
         >
           + Nuovo album
         </button>
@@ -98,8 +101,8 @@ export default function GalleryPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: 18,
+            gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(260px, 1fr))",
+            gap: isMobile ? 10 : 18,
           }}
         >
           {albums.map((a) => (
@@ -461,8 +464,8 @@ function AlbumDetailModal({ albumId, user, isAdmin, onClose }) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-              gap: 8,
+              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+              gap: 6,
             }}
           >
             {photos.map((p, idx) => (

@@ -3,6 +3,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import * as turf from "@turf/turf";
 import { colors, fonts } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 // Palette di colori per distinguere gli itinerari
 const ROUTE_COLORS = [
@@ -32,12 +33,14 @@ const MAP_STYLE = {
 };
 
 export default function MappaPage() {
+  const isMobile = useIsMobile();
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const [routes, setRoutes] = useState([]); // [{ fid, nome, lunghezza, color }]
   const [selected, setSelected] = useState(null);
   const [hiddenFids, setHiddenFids] = useState(new Set());
-  const [panelOpen, setPanelOpen] = useState(true);
+  // Su mobile pannello chiuso di default
+  const [panelOpen, setPanelOpen] = useState(!isMobile);
 
   // Misura
   const [measureMode, setMeasureMode] = useState(false);
@@ -327,16 +330,16 @@ export default function MappaPage() {
         href="/"
         style={{
           position: "absolute",
-          top: 16,
-          left: 16,
+          top: 12,
+          left: 12,
           zIndex: 6,
-          padding: "8px 14px",
+          padding: isMobile ? "6px 10px" : "8px 14px",
           background: "#ffffffee",
           backdropFilter: "blur(10px)",
           borderRadius: 10,
           color: colors.foam,
           textDecoration: "none",
-          fontSize: 13,
+          fontSize: isMobile ? 12 : 13,
           fontWeight: 600,
           boxShadow: colors.shadowSoft,
           border: `1px solid ${colors.borderSoft}`,
@@ -345,24 +348,43 @@ export default function MappaPage() {
         ← Home
       </a>
 
-      {/* Pannello legenda / itinerari (collassabile) */}
+      {/* Pannello legenda / itinerari (collassabile). Mobile: bottom sheet */}
       <div
-        style={{
-          position: "absolute",
-          top: 60,
-          left: 16,
-          width: panelOpen ? 280 : "auto",
-          maxHeight: panelOpen ? "calc(100% - 76px)" : "auto",
-          background: "#ffffffee",
-          backdropFilter: "blur(10px)",
-          borderRadius: 14,
-          boxShadow: colors.shadowMed,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 5,
-          transition: "width .2s ease",
-        }}
+        style={
+          isMobile
+            ? {
+                position: "absolute",
+                left: 12,
+                right: 12,
+                bottom: 12,
+                maxHeight: panelOpen ? "55vh" : "auto",
+                background: "#ffffffee",
+                backdropFilter: "blur(10px)",
+                borderRadius: 14,
+                boxShadow: colors.shadowMed,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                zIndex: 5,
+                transition: "max-height .25s ease",
+              }
+            : {
+                position: "absolute",
+                top: 60,
+                left: 16,
+                width: panelOpen ? 280 : "auto",
+                maxHeight: panelOpen ? "calc(100% - 76px)" : "auto",
+                background: "#ffffffee",
+                backdropFilter: "blur(10px)",
+                borderRadius: 14,
+                boxShadow: colors.shadowMed,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                zIndex: 5,
+                transition: "width .2s ease",
+              }
+        }
       >
         <button
           onClick={() => setPanelOpen((v) => !v)}
@@ -473,20 +495,36 @@ export default function MappaPage() {
         )}
       </div>
 
-      {/* Tool misura (sotto i controlli mappa, a destra) */}
+      {/* Tool misura (sotto controlli mappa su desktop, in basso-destra su mobile) */}
       <div
-        style={{
-          position: "absolute",
-          top: 140,
-          right: 16,
-          background: "#ffffffee",
-          backdropFilter: "blur(10px)",
-          borderRadius: 14,
-          boxShadow: colors.shadowMed,
-          padding: measureMode ? "12px 16px" : "10px 14px",
-          zIndex: 5,
-          minWidth: measureMode ? 220 : "auto",
-        }}
+        style={
+          isMobile
+            ? {
+                position: "absolute",
+                top: 12,
+                right: 12,
+                background: "#ffffffee",
+                backdropFilter: "blur(10px)",
+                borderRadius: 12,
+                boxShadow: colors.shadowMed,
+                padding: measureMode ? "10px 12px" : "6px 10px",
+                zIndex: 6,
+                maxWidth: measureMode ? "calc(100vw - 24px)" : "auto",
+                minWidth: measureMode ? 200 : "auto",
+              }
+            : {
+                position: "absolute",
+                top: 140,
+                right: 16,
+                background: "#ffffffee",
+                backdropFilter: "blur(10px)",
+                borderRadius: 14,
+                boxShadow: colors.shadowMed,
+                padding: measureMode ? "12px 16px" : "10px 14px",
+                zIndex: 5,
+                minWidth: measureMode ? 220 : "auto",
+              }
+        }
       >
         {!measureMode ? (
           <button
@@ -613,22 +651,41 @@ export default function MappaPage() {
       {/* Info itinerario selezionato */}
       {selected && !measureMode && (
         <div
-          style={{
-            position: "absolute",
-            bottom: 28,
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "#ffffffee",
-            backdropFilter: "blur(10px)",
-            borderRadius: 14,
-            boxShadow: colors.shadowMed,
-            padding: "14px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            zIndex: 5,
-            borderLeft: `5px solid ${selected.color}`,
-          }}
+          style={
+            isMobile
+              ? {
+                  position: "absolute",
+                  top: 56,
+                  left: 12,
+                  right: 12,
+                  background: "#ffffffee",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 12,
+                  boxShadow: colors.shadowMed,
+                  padding: "10px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  zIndex: 6,
+                  borderLeft: `4px solid ${selected.color}`,
+                }
+              : {
+                  position: "absolute",
+                  bottom: 28,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#ffffffee",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: 14,
+                  boxShadow: colors.shadowMed,
+                  padding: "14px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  zIndex: 5,
+                  borderLeft: `5px solid ${selected.color}`,
+                }
+          }
         >
           <div>
             <div style={{ fontSize: 11, color: colors.muted, textTransform: "uppercase", letterSpacing: 1 }}>

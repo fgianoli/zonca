@@ -18,21 +18,34 @@
       rel="stylesheet"
     />
     <style>
-      html, body { margin: 0; padding: 0; background: #f8fbfd; color: #0f1f2e; }
+      html, body { margin: 0; padding: 0; background: #f8fbfd; color: #0f1f2e; -webkit-text-size-adjust: 100%; }
       * { box-sizing: border-box; }
+      input, textarea, select { font-size: 16px; } /* evita zoom iOS */
       input:focus, textarea:focus, select:focus {
         border-color: #0891b2 !important;
         box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12) !important;
       }
-      button:not(:disabled):hover {
-        transform: translateY(-1px);
-        filter: brightness(1.05);
+      /* Hover solo su dispositivi con puntatore fine (desktop) */
+      @media (hover: hover) and (pointer: fine) {
+        button:not(:disabled):hover {
+          transform: translateY(-1px);
+          filter: brightness(1.05);
+        }
       }
       button:disabled { opacity: 0.5; cursor: not-allowed !important; }
       ::-webkit-scrollbar { width: 10px; height: 10px; }
       ::-webkit-scrollbar-track { background: #f1f5f9; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+      /* Mobile */
+      @media (max-width: 768px) {
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        body { overflow-x: hidden; }
+      }
+
+      /* Utility: no-scroll body quando menu/modal aperto */
+      body.no-scroll { overflow: hidden; }
     </style>
   </head>
   <body>

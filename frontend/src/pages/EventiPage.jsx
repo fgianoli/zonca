@@ -3,6 +3,7 @@ import { eventsApi } from "../api/services";
 import { S, colors, fonts, formatDate } from "../styles/theme";
 import Modal from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const EVENT_TYPES = {
   regata: { label: "Regata", icon: "🏁", color: colors.lagoon },
@@ -40,6 +41,7 @@ function formatDateTime(s) {
 export default function EventiPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isMobile = useIsMobile();
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -215,29 +217,44 @@ export default function EventiPage() {
   };
 
   return (
-    <div style={S.container}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-end",
+          alignItems: isMobile ? "stretch" : "flex-end",
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
           gap: 12,
         }}
       >
         <div>
-          <h1 style={S.title}>Eventi e Regate</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Eventi e Regate</h1>
           <p style={S.subtitle}>Calendario delle manifestazioni della remiera</p>
         </div>
         {isAdmin && (
-          <button onClick={openNew} style={S.btn}>
+          <button onClick={openNew} style={{ ...S.btn, width: isMobile ? "100%" : "auto" }}>
             + Nuovo evento
           </button>
         )}
       </div>
 
       {/* Time tabs */}
-      <div style={{ display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" }}>
+      <div
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: 6,
+                marginTop: 20,
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                paddingBottom: 4,
+                WebkitOverflowScrolling: "touch",
+              }
+            : { display: "flex", gap: 6, marginTop: 20, flexWrap: "wrap" }
+        }
+      >
         {[
           { k: "upcoming", l: "Prossimi" },
           { k: "past", l: "Passati" },
@@ -253,6 +270,7 @@ export default function EventiPage() {
               color: timeFilter === t.k ? "#fff" : colors.foam,
               border: `1px solid ${timeFilter === t.k ? "transparent" : colors.border}`,
               boxShadow: timeFilter === t.k ? colors.shadowLagoon : "none",
+              flexShrink: 0,
             }}
           >
             {t.l}
@@ -261,7 +279,21 @@ export default function EventiPage() {
       </div>
 
       {/* Type pills */}
-      <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+      <div
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: 6,
+                marginTop: 10,
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                paddingBottom: 4,
+                WebkitOverflowScrolling: "touch",
+              }
+            : { display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }
+        }
+      >
         <button
           onClick={() => setTypeFilter("")}
           style={{
@@ -269,6 +301,7 @@ export default function EventiPage() {
             background: !typeFilter ? colors.foam : colors.deep,
             color: !typeFilter ? "#fff" : colors.muted,
             border: `1px solid ${colors.border}`,
+            flexShrink: 0,
           }}
         >
           Tutti
@@ -282,6 +315,7 @@ export default function EventiPage() {
               background: typeFilter === k ? `${t.color}22` : colors.deep,
               color: typeFilter === k ? t.color : colors.muted,
               border: `1px solid ${typeFilter === k ? t.color + "55" : colors.border}`,
+              flexShrink: 0,
             }}
           >
             {t.icon} {t.label}
@@ -334,9 +368,9 @@ export default function EventiPage() {
                 key={ev.id}
                 style={{
                   ...S.card,
-                  padding: 18,
+                  padding: isMobile ? 12 : 18,
                   display: "flex",
-                  gap: 18,
+                  gap: isMobile ? 10 : 18,
                   alignItems: "stretch",
                   borderLeft: `4px solid ${type.color}`,
                   cursor: "pointer",
@@ -346,7 +380,7 @@ export default function EventiPage() {
                 {/* Date badge */}
                 <div
                   style={{
-                    flex: "0 0 72px",
+                    flex: isMobile ? "0 0 56px" : "0 0 72px",
                     textAlign: "center",
                     background: `${type.color}11`,
                     border: `1px solid ${type.color}33`,
@@ -360,7 +394,7 @@ export default function EventiPage() {
                   <div
                     style={{
                       fontFamily: fonts.display,
-                      fontSize: 30,
+                      fontSize: isMobile ? 22 : 30,
                       fontWeight: 700,
                       color: type.color,
                       lineHeight: 1,
@@ -388,7 +422,7 @@ export default function EventiPage() {
                     <div
                       style={{
                         fontFamily: fonts.display,
-                        fontSize: 20,
+                        fontSize: isMobile ? 16 : 20,
                         fontWeight: 700,
                         color: colors.foam,
                       }}

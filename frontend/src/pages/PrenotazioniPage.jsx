@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { bookingsApi, exportsApi, downloadBlob } from "../api/services";
 import { colors, fonts, S, TIPI_BARCA, formatDate } from "../styles/theme";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const FILTERS = [
   { id: "tutte", label: "Tutte" },
@@ -20,6 +21,7 @@ export default function PrenotazioniPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const isPope = user?.role === "pope" || isAdmin;
+  const isMobile = useIsMobile();
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,17 +119,27 @@ export default function PrenotazioniPage() {
   };
 
   return (
-    <div style={S.container}>
-      <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
+      <div
+        style={{
+          marginBottom: 20,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "stretch" : "flex-end",
+          gap: 12,
+          flexDirection: isMobile ? "column" : "row",
+          flexWrap: "wrap",
+        }}
+      >
         <div>
-          <h1 style={S.title}>Prenotazioni</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Prenotazioni</h1>
           <div style={S.subtitle}>
             {bookings.length} totali • {counts.attesa} in attesa di conferma
           </div>
         </div>
         {isAdmin && (
           <button
-            style={{ ...S.btn, ...S.btnGhost }}
+            style={{ ...S.btn, ...S.btnGhost, width: isMobile ? "100%" : "auto" }}
             onClick={async () => {
               try {
                 const res = await exportsApi.bookings("", "");
@@ -144,7 +156,21 @@ export default function PrenotazioniPage() {
       </div>
 
       {/* Filter tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+      <div
+        style={
+          isMobile
+            ? {
+                display: "flex",
+                gap: 6,
+                marginBottom: 16,
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                paddingBottom: 4,
+                WebkitOverflowScrolling: "touch",
+              }
+            : { display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }
+        }
+      >
         {FILTERS.map((f) => {
           const active = filter === f.id;
           return (
@@ -157,6 +183,7 @@ export default function PrenotazioniPage() {
                 border: `1px solid ${active ? colors.lagoon : colors.muted}44`,
                 color: active ? "#fff" : colors.muted,
                 padding: "6px 14px",
+                flexShrink: 0,
               }}
             >
               {f.label} <span style={{ opacity: 0.7 }}>({counts[f.id] || 0})</span>
@@ -203,6 +230,7 @@ export default function PrenotazioniPage() {
                     <BookingCard
                       key={b.id}
                       booking={b}
+                      isMobile={isMobile}
                       canConfirm={canConfirm(b)}
                       canDelete={canDelete(b)}
                       onConfirm={() => confirm(b)}
@@ -218,7 +246,7 @@ export default function PrenotazioniPage() {
   );
 }
 
-function BookingCard({ booking: b, canConfirm, canDelete, onConfirm, onDelete }) {
+function BookingCard({ booking: b, isMobile, canConfirm, canDelete, onConfirm, onDelete }) {
   const boat = b.boat || {};
   const tipo = TIPI_BARCA[boat.tipo] || TIPI_BARCA.altro;
   const boatColor = boat.color || colors.lagoon;
@@ -231,12 +259,13 @@ function BookingCard({ booking: b, canConfirm, canDelete, onConfirm, onDelete })
         ...S.card,
         padding: 0,
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         alignItems: "stretch",
         overflow: "hidden",
         borderLeft: `4px solid ${boatColor}`,
       }}
     >
-      <div style={{ flex: 1, padding: 14, minWidth: 0 }}>
+      <div style={{ flex: 1, padding: isMobile ? 12 : 14, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
           <span style={{ fontSize: 22 }}>{tipo.icon}</span>
           <div>
@@ -273,12 +302,13 @@ function BookingCard({ booking: b, canConfirm, canDelete, onConfirm, onDelete })
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
+          flexDirection: isMobile ? "row" : "column",
+          alignItems: isMobile ? "center" : "flex-end",
           gap: 8,
-          padding: 14,
-          minWidth: 130,
+          padding: isMobile ? "0 12px 12px" : 14,
+          minWidth: isMobile ? 0 : 130,
           justifyContent: "space-between",
+          flexWrap: "wrap",
         }}
       >
         <span

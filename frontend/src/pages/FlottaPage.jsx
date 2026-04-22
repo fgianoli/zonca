@@ -4,6 +4,7 @@ import { colors, fonts, S, TIPI_BARCA, formatDate } from "../styles/theme";
 import Modal from "../components/Modal";
 import BoatMaintenanceModal from "../components/BoatMaintenanceModal";
 import { useAuth } from "../context/AuthContext";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 const BOAT_COLORS = [
   "#c0392b",
@@ -38,6 +39,7 @@ const EMPTY_BOAT = {
 export default function FlottaPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const isMobile = useIsMobile();
 
   const [boats, setBoats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,18 +160,19 @@ export default function FlottaPage() {
   };
 
   return (
-    <div style={S.container}>
+    <div style={{ ...S.container, padding: isMobile ? "16px 12px" : "32px 24px" }}>
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: isMobile ? "stretch" : "center",
           justifyContent: "space-between",
           gap: 12,
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
         }}
       >
         <div>
-          <h1 style={S.title}>Flotta</h1>
+          <h1 style={{ ...S.title, fontSize: isMobile ? 24 : 30 }}>Flotta</h1>
           <p style={S.subtitle}>
             {boats.length} imbarcazioni • {countByStatus.attiva} attive •{" "}
             {countByStatus.manutenzione} in manutenzione •{" "}
@@ -177,7 +180,7 @@ export default function FlottaPage() {
           </p>
         </div>
         {isAdmin && (
-          <button onClick={openAdd} style={S.btn}>
+          <button onClick={openAdd} style={{ ...S.btn, width: isMobile ? "100%" : "auto" }}>
             + Aggiungi barca
           </button>
         )}
@@ -187,8 +190,8 @@ export default function FlottaPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 10,
+          gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: isMobile ? 6 : 10,
           marginTop: 16,
         }}
       >
@@ -298,8 +301,7 @@ export default function FlottaPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(240px, 1fr))",
+                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(240px, 1fr))",
                   gap: 14,
                 }}
               >
