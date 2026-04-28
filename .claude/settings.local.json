@@ -50,7 +50,12 @@
       "Bash(curl -s http://localhost:8000/api/weather/laguna-venezia)",
       "Bash(curl -s -o /dev/null -w \"Frontend: %{http_code}\\\\n\" http://localhost:8080/)",
       "Bash(git fetch *)",
-      "Bash(git rev-list *)"
+      "Bash(git rev-list *)",
+      "Bash(sed -i 's|e\\\\.response?\\\\.data?\\\\.detail || \"\\\\\\([^\"]*\\\\\\)\"|getErrorMessage\\(e, \"\\\\1\"\\)|g' SociPage.jsx)",
+      "Bash(sed -i 's|err\\\\.response?\\\\.data?\\\\.detail || \"\\\\\\([^\"]*\\\\\\)\"|getErrorMessage\\(err, \"\\\\1\"\\)|g' SociPage.jsx)",
+      "Bash(perl -i -pe 's/\\(e|err\\)\\\\.response\\\\?\\\\.data\\\\?\\\\.detail \\\\|\\\\| \"\\([^\"]+\\)\"/getErrorMessage\\($1, \"$2\"\\)/g' SociPage.jsx)",
+      "Bash(cd /c/Users/giano/Desktop/SVILUPPO/Zonca/frontend/src echo \"=== File con il pattern problematico ===\" grep -rl \"response?.data?.detail\" pages components)",
+      "Bash(perl -i -pe \"s/e\\\\?\\\\.response\\\\?\\\\.data\\\\?\\\\.detail \\\\|\\\\| \\\\\"Errore nell'iscrizione\\\\\"/getErrorMessage\\(e, \\\\\"Errore nell'iscrizione\\\\\"\\)/g\" /c/Users/giano/Desktop/SVILUPPO/Zonca/frontend/src/pages/EventiPage.jsx)"
     ]
   }
 }

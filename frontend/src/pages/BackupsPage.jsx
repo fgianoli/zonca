@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { backupsApi, downloadBlob } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { S, colors, fonts, formatDate } from "../styles/theme";
 
 function Banner({ kind = "ok", children }) {
@@ -62,7 +63,7 @@ export default function BackupsPage() {
       setList(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,7 @@ export default function BackupsPage() {
       setTimeout(() => setMsg(""), 2000);
       load();
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore esecuzione");
+      setError(getErrorMessage(e, "Errore esecuzione"));
     } finally {
       setRunning(false);
     }
@@ -93,7 +94,7 @@ export default function BackupsPage() {
       const res = await backupsApi.download(f.filename);
       downloadBlob(res, f.filename);
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore download");
+      setError(getErrorMessage(e, "Errore download"));
     }
   };
 
@@ -105,7 +106,7 @@ export default function BackupsPage() {
       setTimeout(() => setMsg(""), 1500);
       load();
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore eliminazione");
+      setError(getErrorMessage(e, "Errore eliminazione"));
     }
   };
 

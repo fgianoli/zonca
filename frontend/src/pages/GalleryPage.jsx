@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { galleryApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { S, colors, fonts, formatDate } from "../styles/theme";
 import { useIsMobile } from "../hooks/useMediaQuery";
@@ -43,7 +44,7 @@ export default function GalleryPage() {
       setAlbums(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ export default function GalleryPage() {
       await galleryApi.removeAlbum(album.id);
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore eliminazione");
+      alert(getErrorMessage(e, "Errore eliminazione"));
     }
   };
 
@@ -261,7 +262,7 @@ function AlbumFormModal({ title, initial, onClose, onSave }) {
     try {
       await onSave({ ...form, date: form.date || null });
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore salvataggio");
+      setErr(getErrorMessage(e, "Errore salvataggio"));
     } finally {
       setSaving(false);
     }
@@ -326,7 +327,7 @@ function AlbumDetailModal({ albumId, user, isAdmin, onClose }) {
       setAlbum(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore");
+      setError(getErrorMessage(e, "Errore"));
     } finally {
       setLoading(false);
     }
@@ -351,7 +352,7 @@ function AlbumDetailModal({ albumId, user, isAdmin, onClose }) {
         load();
         setTimeout(() => setUploadMsg(""), 2000);
       } catch (e) {
-        setUploadMsg(e.response?.data?.detail || "Errore upload");
+        setUploadMsg(getErrorMessage(e, "Errore upload"));
       } finally {
         setUploading(false);
       }
@@ -373,7 +374,7 @@ function AlbumDetailModal({ albumId, user, isAdmin, onClose }) {
       setLightbox(null);
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore");
+      alert(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -384,7 +385,7 @@ function AlbumDetailModal({ albumId, user, isAdmin, onClose }) {
       setTimeout(() => setUploadMsg(""), 1500);
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore");
+      alert(getErrorMessage(e, "Errore"));
     }
   };
 

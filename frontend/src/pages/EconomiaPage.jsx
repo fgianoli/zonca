@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { financeApi, membersApi, exportsApi, downloadBlob } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { S, colors, fonts, formatDate, formatEuro, todayStr } from "../styles/theme";
 import Modal from "../components/Modal";
 import { useIsMobile } from "../hooks/useMediaQuery";
@@ -184,7 +185,7 @@ export default function EconomiaPage() {
                 const label = from || to ? `${from || "inizio"}_${to || "oggi"}` : "tutti";
                 downloadBlob(res, `movimenti_${label}.csv`);
               } catch (e) {
-                alert(e.response?.data?.detail || "Errore export");
+                alert(getErrorMessage(e, "Errore export"));
               }
             }}
           >

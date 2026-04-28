@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { bookingsApi, exportsApi, downloadBlob } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { colors, fonts, S, TIPI_BARCA, formatDate } from "../styles/theme";
 import { useIsMobile } from "../hooks/useMediaQuery";
 
@@ -36,7 +37,7 @@ export default function PrenotazioniPage() {
       setBookings(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore nel caricamento");
+      setError(getErrorMessage(e, "Errore nel caricamento"));
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ export default function PrenotazioniPage() {
       setMsg("Prenotazione confermata ✓");
       load();
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      setMsg(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -107,7 +108,7 @@ export default function PrenotazioniPage() {
       setMsg("Prenotazione eliminata");
       load();
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      setMsg(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -146,7 +147,7 @@ export default function PrenotazioniPage() {
                 downloadBlob(res, "prenotazioni.csv");
               } catch (e) {
                 setMsg("");
-                setError(e.response?.data?.detail || "Errore export");
+                setError(getErrorMessage(e, "Errore export"));
               }
             }}
           >

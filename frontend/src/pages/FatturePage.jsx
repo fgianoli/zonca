@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { invoicesApi, membersApi, downloadBlob } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { S, colors, fonts, formatDate, formatEuro } from "../styles/theme";
 
@@ -49,7 +50,7 @@ export default function FatturePage() {
       if (members.length === 0) setMembers(m.data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export default function FatturePage() {
       const res = await invoicesApi.downloadPdf(inv.id);
       downloadBlob(res, `fattura_${inv.number || inv.id}.pdf`);
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore download");
+      alert(getErrorMessage(e, "Errore download"));
     }
   };
 
@@ -91,7 +92,7 @@ export default function FatturePage() {
       setTimeout(() => setMsg(""), 1500);
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore");
+      alert(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -324,7 +325,7 @@ function InvoiceFormModal({ members, year, onClose, onSaved }) {
       await invoicesApi.create(payload);
       onSaved();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore creazione fattura");
+      setErr(getErrorMessage(e, "Errore creazione fattura"));
     } finally {
       setSaving(false);
     }

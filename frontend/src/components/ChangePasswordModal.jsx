@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { usersApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { S, colors } from "../styles/theme";
 
 export default function ChangePasswordModal({ onClose }) {

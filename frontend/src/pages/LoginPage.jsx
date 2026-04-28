@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../api/client";
 import { colors, fonts, S } from "../styles/theme";
 
 export default function LoginPage() {
@@ -19,7 +20,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate("/calendario");
     } catch (err) {
-      setError(err.response?.data?.detail || "Errore di accesso");
+      setError(getErrorMessage(err, "Errore di accesso"));
     } finally {
       setLoading(false);
     }

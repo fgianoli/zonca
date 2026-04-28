@@ -9,6 +9,7 @@ import {
   gdprApi,
   downloadBlob,
 } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { S, colors, fonts, RUOLI, formatDate, formatEuro, TIPI_BARCA } from "../styles/theme";
 import { ChangePasswordForm } from "../components/ChangePasswordModal";
 import { useIsMobile } from "../hooks/useMediaQuery";
@@ -158,7 +159,7 @@ function GdprTab() {
       downloadBlob(res, `miei_dati_zonca_${today}.json`);
       setMsg("Download avviato ✓");
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore durante il download");
+      setErr(getErrorMessage(e, "Errore durante il download"));
     } finally {
       setBusy(false);
     }
@@ -179,7 +180,7 @@ function GdprTab() {
       setReason("");
       setConfirm(false);
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore invio richiesta");
+      setErr(getErrorMessage(e, "Errore invio richiesta"));
     } finally {
       setBusy(false);
     }
@@ -342,7 +343,7 @@ function InfoTab({ user }) {
       setMember(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -503,7 +504,7 @@ function PrenotazioniTab({ user }) {
       const { data } = await bookingsApi.list();
       setBookings(data);
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore caricamento");
+      setErr(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -533,7 +534,7 @@ function PrenotazioniTab({ user }) {
       setMsg("Prenotazione eliminata");
       load();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore");
+      setErr(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -628,7 +629,7 @@ function QuoteTab({ user }) {
     feesApi
       .list({ member_id: user.member_id })
       .then((r) => setFees(r.data))
-      .catch((e) => setErr(e.response?.data?.detail || "Errore"))
+      .catch((e) => setErr(getErrorMessage(e, "Errore")))
       .finally(() => setLoading(false));
   }, [user?.member_id]);
 
@@ -719,7 +720,7 @@ function DocumentiTab({ user }) {
       setMedExpiry(m.data.medical_cert_expiry || "");
       setDocs(d.data);
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore caricamento");
+      setErr(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -738,7 +739,7 @@ function DocumentiTab({ user }) {
       setMsg("Scadenza aggiornata ✓");
       load();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore");
+      setErr(getErrorMessage(e, "Errore"));
     } finally {
       setBusy(false);
     }
@@ -758,7 +759,7 @@ function DocumentiTab({ user }) {
       setMsg("Certificato caricato ✓");
       load();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore upload");
+      setErr(getErrorMessage(e, "Errore upload"));
     } finally {
       setBusy(false);
     }
@@ -785,7 +786,7 @@ function DocumentiTab({ user }) {
       setMsg("Documento caricato ✓");
       load();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore upload");
+      setErr(getErrorMessage(e, "Errore upload"));
     } finally {
       setBusy(false);
     }
@@ -993,7 +994,7 @@ function IcalTab() {
       setUrls(data.urls || null);
       setMsg("Link calendario generato ✓");
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore generazione token");
+      setErr(getErrorMessage(e, "Errore generazione token"));
     } finally {
       setBusy(false);
     }
@@ -1009,7 +1010,7 @@ function IcalTab() {
       setUrls(null);
       setMsg("Token revocato");
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore revoca");
+      setErr(getErrorMessage(e, "Errore revoca"));
     } finally {
       setBusy(false);
     }

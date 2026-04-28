@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { emailTemplatesApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { S, colors, fonts, formatDate } from "../styles/theme";
 
@@ -36,7 +37,7 @@ export default function TemplateEmailPage() {
       setList(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -54,7 +55,7 @@ export default function TemplateEmailPage() {
       setTimeout(() => setMsg(""), 2000);
       load();
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore seed");
+      setError(getErrorMessage(e, "Errore seed"));
     }
   };
 
@@ -177,7 +178,7 @@ function TemplateEditModal({ tplKey, onClose, onSaved }) {
         setSubject(data.subject || "");
         setBody(data.body_html || data.body || "");
       })
-      .catch((e) => setErr(e.response?.data?.detail || "Errore"))
+      .catch((e) => setErr(getErrorMessage(e, "Errore")))
       .finally(() => setLoading(false));
   }, [tplKey]);
 
@@ -205,7 +206,7 @@ function TemplateEditModal({ tplKey, onClose, onSaved }) {
       await emailTemplatesApi.update(tplKey, { subject, body_html: body });
       onSaved();
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore salvataggio");
+      setErr(getErrorMessage(e, "Errore salvataggio"));
     } finally {
       setSaving(false);
     }
@@ -217,7 +218,7 @@ function TemplateEditModal({ tplKey, onClose, onSaved }) {
       const { data } = await emailTemplatesApi.preview(tplKey, {});
       setPreview(data);
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore anteprima");
+      setErr(getErrorMessage(e, "Errore anteprima"));
     } finally {
       setPreviewBusy(false);
     }

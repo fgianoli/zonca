@@ -8,6 +8,7 @@ import {
   invoicesApi,
   downloadBlob,
 } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { colors, fonts, S, RUOLI, formatDate, formatEuro } from "../styles/theme";
 import { useIsMobile } from "../hooks/useMediaQuery";
@@ -80,7 +81,7 @@ export default function SociPage() {
       setMembers(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore nel caricamento");
+      setError(getErrorMessage(e, "Errore nel caricamento"));
     } finally {
       setLoading(false);
     }
@@ -117,7 +118,7 @@ export default function SociPage() {
       await membersApi.update(m.id, { is_active: false });
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore");
+      alert(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -145,7 +146,7 @@ export default function SociPage() {
                   const res = await exportsApi.members();
                   downloadBlob(res, "soci.csv");
                 } catch (e) {
-                  alert(e.response?.data?.detail || "Errore export");
+                  alert(getErrorMessage(e, "Errore export"));
                 }
               }}
               style={{ ...S.btn, ...S.btnGhost, width: isMobile ? "100%" : "auto" }}
@@ -426,7 +427,7 @@ function MemberFormModal({ title, initial, onClose, onSave }) {
     try {
       await onSave(form);
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore nel salvataggio");
+      setErr(getErrorMessage(e, "Errore nel salvataggio"));
     } finally {
       setSaving(false);
     }
@@ -611,7 +612,7 @@ function AnagraficaTab({ member, canEdit, onChange }) {
       setMsg("Salvato ✓");
       onChange(data);
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      setMsg(getErrorMessage(e, "Errore"));
     } finally {
       setSaving(false);
     }
@@ -686,7 +687,7 @@ function MedicalTab({ member, canEdit, onChange }) {
       onChange(data);
       setMsg("Scadenza aggiornata ✓");
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      setMsg(getErrorMessage(e, "Errore"));
     } finally {
       setBusy(false);
     }
@@ -702,7 +703,7 @@ function MedicalTab({ member, canEdit, onChange }) {
       setFile(null);
       setMsg("File caricato ✓");
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore upload");
+      setMsg(getErrorMessage(e, "Errore upload"));
     } finally {
       setBusy(false);
     }
@@ -818,7 +819,7 @@ function DocumentiTab({ member, canEdit, isAdmin }) {
       setMsg("Documento caricato ✓");
       load();
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore upload");
+      setMsg(getErrorMessage(e, "Errore upload"));
     } finally {
       setBusy(false);
     }
@@ -839,7 +840,7 @@ function DocumentiTab({ member, canEdit, isAdmin }) {
       await documentsApi.remove(member.id, doc.id);
       load();
     } catch (e) {
-      setMsg(e.response?.data?.detail || "Errore");
+      setMsg(getErrorMessage(e, "Errore"));
     }
   };
 
@@ -1017,7 +1018,7 @@ function QuoteTab({ member, isAdmin, onMemberReload }) {
       await reloadAll();
       showMsg(!fee.paid ? "Segnata come pagata" : "Segnata come non pagata", "ok");
     } catch (e) {
-      showMsg(e.response?.data?.detail || "Errore aggiornamento", "err");
+      showMsg(getErrorMessage(e, "Errore aggiornamento"), "err");
     }
   };
 
@@ -1028,7 +1029,7 @@ function QuoteTab({ member, isAdmin, onMemberReload }) {
       await reloadAll();
       showMsg("Quota eliminata", "ok");
     } catch (e) {
-      showMsg(e.response?.data?.detail || "Errore eliminazione", "err");
+      showMsg(getErrorMessage(e, "Errore eliminazione"), "err");
     }
   };
 
@@ -1108,7 +1109,7 @@ function QuoteTab({ member, isAdmin, onMemberReload }) {
                               }
                             } catch (e) {
                               showMsg(
-                                e.response?.data?.detail || "Errore generazione fattura",
+                                getErrorMessage(e, "Errore generazione fattura"),
                                 "err"
                               );
                             }

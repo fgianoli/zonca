@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { crewsApi, membersApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { S, colors, fonts, SLOTS, RUOLI } from "../styles/theme";
 import { useIsMobile } from "../hooks/useMediaQuery";
@@ -53,7 +54,7 @@ export default function EquipaggiPage() {
       setMembers(m.data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ export default function EquipaggiPage() {
       await crewsApi.remove(crew.id);
       load();
     } catch (e) {
-      alert(e.response?.data?.detail || "Errore eliminazione");
+      alert(getErrorMessage(e, "Errore eliminazione"));
     }
   };
 
@@ -443,7 +444,7 @@ function CrewFormModal({ title, initial, members, onClose, onSave }) {
         default_slot: form.default_slot || null,
       });
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore salvataggio");
+      setErr(getErrorMessage(e, "Errore salvataggio"));
     } finally {
       setSaving(false);
     }

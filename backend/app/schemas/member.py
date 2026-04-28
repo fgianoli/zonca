@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class MemberRuolo(str, Enum):
@@ -9,6 +9,13 @@ class MemberRuolo(str, Enum):
     paron = "paron"
     provin = "provin"
     ospite = "ospite"
+
+
+def _empty_to_none(v):
+    """Converte stringhe vuote in None — utile per campi opzionali."""
+    if isinstance(v, str) and v.strip() == "":
+        return None
+    return v
 
 
 class MemberCreate(BaseModel):
@@ -21,6 +28,16 @@ class MemberCreate(BaseModel):
     medical_cert_expiry: date | None = None
     fee_paid: bool = False
     fee_year: int | None = None
+
+    @field_validator("tessera", "phone", "note", mode="before")
+    @classmethod
+    def _blank_to_none_text(cls, v):
+        return _empty_to_none(v)
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def _blank_to_none_email(cls, v):
+        return _empty_to_none(v)
 
 
 class MemberRead(BaseModel):
@@ -54,3 +71,13 @@ class MemberUpdate(BaseModel):
     medical_cert_expiry: date | None = None
     fee_paid: bool | None = None
     fee_year: int | None = None
+
+    @field_validator("tessera", "phone", "note", mode="before")
+    @classmethod
+    def _blank_to_none_text(cls, v):
+        return _empty_to_none(v)
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def _blank_to_none_email(cls, v):
+        return _empty_to_none(v)

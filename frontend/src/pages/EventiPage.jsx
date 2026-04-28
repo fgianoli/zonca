@@ -156,7 +156,7 @@ export default function EventiPage() {
         setDetailEvent(r.data);
       }
     } catch (e) {
-      alert(e?.response?.data?.detail || "Errore nell'iscrizione");
+      alert(getErrorMessage(e, "Errore nell'iscrizione"));
     }
   };
 

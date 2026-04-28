@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { gdprApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import { S, colors, fonts, formatDate } from "../styles/theme";
 
 function Banner({ kind = "ok", children }) {
@@ -35,7 +36,7 @@ export default function GdprRequestsPage() {
       setRequests(data);
       setError("");
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ export default function GdprRequestsPage() {
       setTimeout(() => setMsg(""), 2000);
       load();
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore");
+      setError(getErrorMessage(e, "Errore"));
     } finally {
       setProcessing(null);
     }

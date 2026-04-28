@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { usersApi, membersApi } from "../api/services";
+import { getErrorMessage } from "../api/client";
 import Modal from "../components/Modal";
 import { colors, fonts, S, formatDate } from "../styles/theme";
 
@@ -35,7 +36,7 @@ export default function UtentiPage() {
       setUsers(u.data);
       setMembers(m.data);
     } catch (e) {
-      setError(e.response?.data?.detail || "Errore caricamento");
+      setError(getErrorMessage(e, "Errore caricamento"));
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ export default function UtentiPage() {
       await load();
       flash(u.is_active ? "Utente disattivato" : "Utente riattivato");
     } catch (e) {
-      flash(e.response?.data?.detail || "Errore", "err");
+      flash(getErrorMessage(e, "Errore"), "err");
     }
   };
 
@@ -91,7 +92,7 @@ export default function UtentiPage() {
       await load();
       flash("Utente eliminato");
     } catch (e) {
-      flash(e.response?.data?.detail || "Errore eliminazione", "err");
+      flash(getErrorMessage(e, "Errore eliminazione"), "err");
     }
   };
 
@@ -434,7 +435,7 @@ function UserFormModal({ title, initial, editMode, members, onClose, onSave }) {
         member_id: form.member_id || null,
       });
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore");
+      setErr(getErrorMessage(e, "Errore"));
     } finally {
       setSaving(false);
     }
@@ -609,7 +610,7 @@ function ResetPasswordModal({ user, onClose, onDone, result }) {
       );
       onDone({ email: user.email, password: data.new_password });
     } catch (e) {
-      setErr(e.response?.data?.detail || "Errore reset");
+      setErr(getErrorMessage(e, "Errore reset"));
     } finally {
       setBusy(false);
     }
