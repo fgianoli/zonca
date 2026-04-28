@@ -56,13 +56,36 @@ def get_member(
     return member
 
 
+# Campi opzionali su cui convertire "" → None per evitare conflitti
+# di vincoli UNIQUE e per coerenza dei dati.
+_NULLABLE_TEXT_FIELDS = {"tessera", "email", "phone", "note"}
+
+
+def _normalize_blank_strings(data: dict) -> dict:
+    for key in _NULLABLE_TEXT_FIELDS:
+        if key in data and isinstance(data[key], str) and data[key].strip() == "":
+            data[key] = None
+    return data
+
+
 @router.post("/", response_model=MemberRead, status_code=201)
 def create_member(
     body: MemberCreate,
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ):
-    member = Member(**body.model_dump())
+    data = _normalize_blank_strings(body.model_dump())
+
+    # Tessera duplicata?
+    if data.get("tessera"):
+        existing = db.query(Member).filter(Member.tessera == data["tessera"]).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Tessera '{data['tessera']}' già in uso",
+            )
+
+    member = Member(**data)
     db.add(member)
     db.commit()
     db.refresh(member)
@@ -80,7 +103,20 @@ def update_member(
     if not member:
         raise HTTPException(status_code=404, detail="Socio non trovato")
 
-    data = body.model_dump(exclude_unset=True)
+    data = _normalize_blank_strings(body.model_dump(exclude_unset=True))
+
+    # Tessera duplicata su altro socio?
+    if "tessera" in data and data["tessera"]:
+        existing = (
+            db.query(Member)
+            .filter(Member.tessera == data["tessera"], Member.id != member_id)
+            .first()
+        )
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Tessera '{data['tessera']}' già in uso da un altro socio",
+            )
 
     # Se viene aggiornata la scadenza certificato, resetta il flag reminded
     if "medical_cert_expiry" in data:
